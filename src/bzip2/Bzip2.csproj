@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VersionPrefix>1.1.0</VersionPrefix>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
+    <Authors>Jaime Olivares, drone1400</Authors>
+    <TargetFrameworks>net461;netstandard2.0;netstandard2.1;netcoreapp3.1;net6.0</TargetFrameworks>
+
+    <AssemblyTitle>Bzip2</AssemblyTitle>
+    <AssemblyName>Bzip2</AssemblyName>
+
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Description>A modification of https://github.com/jaime-olivares/bzip2 to compile under net6.0; also adds parallel block compression.</Description>
+
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Bzip2.test</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+    <BaseIntermediateOutputPath>..\..\output.obj\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>..\..\output.obj\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</IntermediateOutputPath>
+    <OutputPath>..\..\output\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+
+</Project>

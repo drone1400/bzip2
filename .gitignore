@@ -1,3 +1,23 @@
-src/.vs/*
-src/bin/*
-src/obj/*
+#custom output directory structure
+output*
+output/*
+output.obj/*
+output.test/*
+output.test.obj/*
+output.MsBuildProps/*
+
+#visual studio stuff
+.vs
+.vscode
+*.suo
+*.user
+
+#jetbrains rider stuff (redundant?)
+.idea
+
+#nuget packages
+*.nupkg
+
+#default build results (no longer really needed though...)
+[Bb]in/
+[Oo]bj/

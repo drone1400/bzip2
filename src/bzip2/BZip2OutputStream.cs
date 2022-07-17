@@ -1,7 +1,8 @@
 ﻿// Bzip2 library for .net
-// By Jaime Olivares
-// Location: http://github.com/jaime-olivares/bzip2
+// Modified by drone1400
+// Location: https://github.com/drone1400/bzip2
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
+// Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
 using System;
 using System.IO;
@@ -35,18 +36,18 @@ namespace Bzip2
         private bool isOwner;
         #endregion
 
-        #region Public fields
+        #region internal fields
         /// <summary>The first 2 bytes of a Bzip2 marker</summary> 
-        public const uint STREAM_START_MARKER_1 = 0x425a;
+        internal const uint STREAM_START_MARKER_1 = 0x425a;
 
         /// <summary>The 'h' that distinguishes BZip from BZip2</summary> 
-        public const uint STREAM_START_MARKER_2 = 0x68;
+        internal const uint STREAM_START_MARKER_2 = 0x68;
 
         /// <summary>First three bytes of the end of stream marker</summary> 
-        public const uint STREAM_END_MARKER_1 = 0x177245;
+        internal const uint STREAM_END_MARKER_1 = 0x177245;
 
         /// <summary>Last three bytes of the end of stream marker</summary> 
-        public const uint STREAM_END_MARKER_2 = 0x385090;
+        internal const uint STREAM_END_MARKER_2 = 0x385090;
         #endregion
 
         #region Public methods
@@ -170,16 +171,17 @@ namespace Bzip2
             }
         }
 
-        public override void Close()
-        {
-            if (this.outputStream != null)
-            {
-                this.Finish();
-                if (isOwner)
-                    this.outputStream.Close();
-                this.outputStream = null;
-            }
+        // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
+        protected override void Dispose(bool disposing) {
+	        if (this.outputStream != null)
+	        {
+		        this.Finish();
+		        if (isOwner)
+			        this.outputStream.Close();
+		        this.outputStream = null;
+	        }
         }
+        
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         #endregion
 
@@ -198,7 +200,7 @@ namespace Bzip2
 			if (this.blockCompressor.IsEmpty) 
 				return;
 
-			this.blockCompressor.Close();
+			this.blockCompressor.CloseBlock();
 			this.streamCRC = ((this.streamCRC << 1) | (this.streamCRC >> 31)) ^ this.blockCompressor.CRC;
         }
 

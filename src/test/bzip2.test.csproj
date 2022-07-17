@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+    <BaseIntermediateOutputPath>..\..\output.test.obj\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>..\..\output.test.obj\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</IntermediateOutputPath>
+    <OutputPath>..\..\output.test\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="coverlet.collector" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\bzip2\Bzip2.csproj" />
+  </ItemGroup>
+
+</Project>

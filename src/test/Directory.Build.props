@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup>
+        <MSBUildProjectExtensionsPath>..\..\output.MsBuildProps\test\</MSBUildProjectExtensionsPath>
+    </PropertyGroup>
+</Project>

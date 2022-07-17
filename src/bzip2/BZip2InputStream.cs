@@ -1,7 +1,8 @@
 ﻿// Bzip2 library for .net
-// By Jaime Olivares
-// Location: http://github.com/jaime-olivares/bzip2
+// Modified by drone1400
+// Location: https://github.com/drone1400/bzip2
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
+// Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
 using System;
 using System.IO;
@@ -153,21 +154,22 @@ namespace Bzip2
 		    return bytesRead;
 		}
 
-        public override void Close()  
-        {
-            if (this.bitInputStream == null) 
-                return;
+		// overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
+		protected override void Dispose(bool disposing) {
+			if (this.bitInputStream == null) 
+				return;
 
-            this.streamComplete = true;
-            this.blockDecompressor = null;
-            this.bitInputStream = null;
+			this.streamComplete = true;
+			this.blockDecompressor = null;
+			this.bitInputStream = null;
 
-            try {
-                this.inputStream.Close();
-            } finally {
-                this.inputStream = null;
-            }
-        }
+			try {
+				this.inputStream.Close();
+			} finally {
+				this.inputStream = null;
+			}
+		}
+
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         #endregion
 

@@ -1,7 +1,8 @@
 ﻿// Bzip2 library for .net
-// By Jaime Olivares
-// Location: http://github.com/jaime-olivares/bzip2
+// Modified by drone1400
+// Location: https://github.com/drone1400/bzip2
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
+// Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
 namespace Bzip2
 {
@@ -20,7 +21,7 @@ namespace Bzip2
     {
         #region Private fields
         // The stream to which compressed BZip2 data is written
-		private readonly BZip2BitOutputStream bitOutputStream;
+		private readonly IBZip2BitOutputStream bitOutputStream;
 
 		// CRC builder for the block
 		private readonly CRC32 crc = new CRC32();
@@ -48,12 +49,12 @@ namespace Bzip2
 		private int rleLength;
         #endregion
 
-        #region Public fields
+        #region internal fields
         // First three bytes of the block header marker
-        public const uint BLOCK_HEADER_MARKER_1 = 0x314159;
+        internal const uint BLOCK_HEADER_MARKER_1 = 0x314159;
 
         // Last three bytes of the block header marker
-        public const uint BLOCK_HEADER_MARKER_2 = 0x265359;
+        internal const uint BLOCK_HEADER_MARKER_2 = 0x265359;
         #endregion
 
         #region Public properties
@@ -83,7 +84,7 @@ namespace Bzip2
          * @param blockSize The declared block size in bytes. Up to this many bytes will be accepted
          *                  into the block after Run-Length Encoding is applied
          */
-        public BZip2BlockCompressor(BZip2BitOutputStream bitOutputStream, int blockSize)
+        public BZip2BlockCompressor(IBZip2BitOutputStream bitOutputStream, int blockSize)
         {
             this.bitOutputStream = bitOutputStream;
 
@@ -157,7 +158,7 @@ namespace Bzip2
          * Compresses and writes out the block
          * Exception on any I/O error writing the data
          */
-        public void Close()
+        public void CloseBlock()
         {
             // If an RLE run is in progress, write it out
             if (this.rleLength > 0)

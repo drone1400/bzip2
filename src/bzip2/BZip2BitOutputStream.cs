@@ -1,7 +1,8 @@
 ﻿// Bzip2 library for .net
-// By Jaime Olivares
-// Location: http://github.com/jaime-olivares/bzip2
+// Modified by drone1400
+// Location: https://github.com/drone1400/bzip2
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
+// Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
 using System.IO;
 
@@ -13,7 +14,7 @@ namespace Bzip2
     /// strings of arbitrary length(up to 24 bits), and bit aligned 32-bit integers.A single byte at a
     /// time is written to the wrapped stream when sufficient bits have been accumulated
     /// </remarks>
-    internal class BZip2BitOutputStream
+    internal class BZip2BitOutputStream : IBZip2BitOutputStream
     {
         #region Private fields
         // The stream to which bits are written
@@ -24,23 +25,20 @@ namespace Bzip2
 
 		// The number of bits currently buffered in bitBuffer
 		private int bitCount;
-        #endregion
+		
+		#endregion
 
-        #region Public methods
-        /**
-         * Public constructor
-	     * @param outputStream The OutputStream to wrap
-	     */
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="outputStream">The OutputStream to wrap</param>
         public BZip2BitOutputStream(Stream outputStream)
         {
             this.outputStream = outputStream;
         }
 
-        /**
-		 * Writes a single bit to the wrapped output stream
-		 * @param value The bit to write
-		 * @Exception if an error occurs writing to the stream
-		 */
+        #region IBZip2BitOutputStream implementation
+        
 		public void WriteBoolean (bool value)
         {
             this.bitCount++;
@@ -53,12 +51,7 @@ namespace Bzip2
 				bitCount = 0;
 			}
 		}
-			
-	    /**
-	     * Writes a zero-terminated unary number to the wrapped output stream
-	     * @param value The number to write (must be non-negative)
-	     * @Exception if an error occurs writing to the stream
-	     */
+		
 		public void WriteUnary (int value)  
         {
 			while (value-- > 0)
@@ -67,13 +60,7 @@ namespace Bzip2
 			}
 			this.WriteBoolean (false);
 		}
-
-	    /**
-	     * Writes up to 24 bits to the wrapped output stream
-	     * @param count The number of bits to write (maximum 24)
-	     * @param value The bits to write
-	     * @Exception if an error occurs writing to the stream
-	     */
+		
 		public void WriteBits (int count,  uint value) 
         {
 			this.bitBuffer |= ((value << (32 - count)) >> bitCount);
@@ -86,22 +73,13 @@ namespace Bzip2
 				bitCount -= 8;
 			}
 		}
-
-		/**
-	     * Writes an integer as 32 bits of output
-	     * @param value The integer to write
-	     * @Exception if an error occurs writing to the stream
-	     */
+		
 		public void WriteInteger (uint value)  
         {
 			this.WriteBits (16, (value >> 16) & 0xffff);
 			this.WriteBits (16, value & 0xffff);
 		}
-
-		/**
-	     * Writes any remaining bits to the output stream, zero padding to a whole byte as required
-	     * @Exception if an error occurs writing to the stream
-	     */
+		
 		public void Flush()  
         {
 			if (this.bitCount > 0) 

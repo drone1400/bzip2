@@ -1,7 +1,8 @@
 ﻿// Bzip2 library for .net
-// By Jaime Olivares
-// Location: http://github.com/jaime-olivares/bzip2
+// Modified by drone1400
+// Location: https://github.com/drone1400/bzip2
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
+// Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
 using System;
 
@@ -23,7 +24,7 @@ namespace Bzip2
         public const int HUFFMAN_GROUP_RUN_LENGTH = 50;
 
         // The BZip2BitOutputStream to which the Huffman tables and data is written
-        private readonly BZip2BitOutputStream bitOutputStream;
+        private readonly IBZip2BitOutputStream bitOutputStream;
 
 		// The output of the Move To Front Transform and Run Length Encoding[2] stages
 		private readonly ushort[] mtfBlock;
@@ -56,7 +57,7 @@ namespace Bzip2
 		 * @param mtfAlphabetSize The size of the MTF block's alphabet
 		 * @param mtfSymbolFrequencies The frequencies the MTF block's symbols
 		 */
-        public BZip2HuffmanStageEncoder(BZip2BitOutputStream bitOutputStream, ushort[] mtfBlock, int mtfLength, int mtfAlphabetSize, int[] mtfSymbolFrequencies)
+        public BZip2HuffmanStageEncoder(IBZip2BitOutputStream bitOutputStream, ushort[] mtfBlock, int mtfLength, int mtfAlphabetSize, int[] mtfSymbolFrequencies)
         {
             this.bitOutputStream = bitOutputStream;
             this.mtfBlock = mtfBlock;
