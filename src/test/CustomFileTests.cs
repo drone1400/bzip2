@@ -10,23 +10,22 @@ public class CustomFileTests {
         string pathIn = @"E:\TEMP\s0yrzp0v\example";
         string pathOut1 = @"E:\TEMP\s0yrzp0v\Example1A.bzip2";
         string pathOut2 = @"E:\TEMP\s0yrzp0v\Example1B.bzip2";
-        string pathOut3 = @"E:\TEMP\s0yrzp0v\Example1C.bzip2";
 
         int threads = Environment.ProcessorCount;
 
         DateTime start;
         DateTime finish;
             
-        // start = DateTime.Now;
-        // using (FileStream fsi = new FileStream(pathIn, FileMode.Open, FileAccess.Read))
-        // using (FileStream fso = new FileStream(pathOut1, FileMode.Create, FileAccess.Write))
-        // {
-        //     BZip2OutputStream compressor = new BZip2OutputStream(fso, false, 9);
-        //     fsi.CopyTo(compressor);
-        //     compressor.Close();
-        // }
-        // finish = DateTime.Now;
-        // Console.WriteLine("  BZip2OutputStream " + (finish-start).TotalMilliseconds);
+        start = DateTime.Now;
+        using (FileStream fsi = new FileStream(pathIn, FileMode.Open, FileAccess.Read))
+        using (FileStream fso = new FileStream(pathOut1, FileMode.Create, FileAccess.Write))
+        {
+            BZip2OutputStream compressor = new BZip2OutputStream(fso, false, 9);
+            fsi.CopyTo(compressor);
+            compressor.Close();
+        }
+        finish = DateTime.Now;
+        Console.WriteLine("  BZip2OutputStream " + (finish-start).TotalMilliseconds);
         
         start = DateTime.Now;
         using (FileStream fsi = new FileStream(pathIn, FileMode.Open, FileAccess.Read))
@@ -38,18 +37,23 @@ public class CustomFileTests {
         }
         finish = DateTime.Now;
         Console.WriteLine($" BZip2ParallelOutputStream - {threads} threads " + (finish-start).TotalMilliseconds);
-            
-        start = DateTime.Now;
-        using (FileStream fsi = new FileStream(pathIn, FileMode.Open, FileAccess.Read))
-        using (FileStream fso = new FileStream(pathOut3, FileMode.Create, FileAccess.Write))
-        {
-            BZip2ParallelCompressor test = new BZip2ParallelCompressor(fsi, fso, 9);
-            test.StartCompression(threads);
-        }
-        finish = DateTime.Now;
-        Console.WriteLine($" BZip2ParallelCompressor - {threads} threads " + (finish-start).TotalMilliseconds);
+       
         
-        Assert.Pass("Files were compressed...");
+        using (FileStream fstest1 = new FileStream(pathOut1, FileMode.Open, FileAccess.Read))
+        using (FileStream fstest2 = new FileStream(pathOut2, FileMode.Open, FileAccess.Read)) {
+            if (fstest1.Length != fstest2.Length) {
+                Assert.Fail("Output streams length mismatch...");
+            }
+
+            for (long i = 0; i < fstest1.Length; i++) {
+                int b1 = fstest1.ReadByte();
+                if (b1 != fstest2.ReadByte()) {
+                    Assert.Fail($"Output stream difference between Stream 1 and 2 at byte index {i}");
+                }
+            }
+        }
+        
+        Assert.Pass("Files were compressed and both results match!...");
     }
     
     

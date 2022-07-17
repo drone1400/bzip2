@@ -17,12 +17,11 @@ namespace Bzip2 {
         private const int ABSOLUTE_MAX_THREADS = 128;
 
         // block size fields
-        private readonly int _readBlockSize;
         private readonly int _compressBlockSize;
         private readonly int _blockLevel;
 
         // max number of active threads
-        private int _mtCompressorThreads = 0;
+        private readonly int _mtCompressorThreads = 0;
         
         // number of active threads
         private int _mtActiveThreads = 0;
@@ -39,7 +38,7 @@ namespace Bzip2 {
 
         // dictionary of processed blocks
         private readonly Dictionary<int, BZip2BitMetaBuffer> _mtProcessedBlocks = new Dictionary<int, BZip2BitMetaBuffer>();
-        private readonly Queue<TempBlockBuffer> _mtPendingBlocksQueue = new Queue<TempBlockBuffer>();
+        private readonly Queue<BZip2BitMetaBuffer> _mtPendingBlocksQueue = new Queue<BZip2BitMetaBuffer>();
 
         private readonly object _syncRootProcesing = new object();
         private readonly object _syncRootActiveThread = new object();
@@ -54,10 +53,13 @@ namespace Bzip2 {
         private uint _streamCrc = 0;
         
         //
-        private TempBlockBuffer _currentBlockBuffer = null;
+        private BZip2BitMetaBuffer _currentBlockBuffer = null;
         
         // True if the underlying stream will be closed with the current Stream
-        private bool _isOwner;
+        private readonly bool _isOwner;
+
+        // for debug purposes...
+        // private int _debugMaxMetaBufferDataPairCount = 0;
         #endregion
 
         /// <summary>
@@ -67,8 +69,7 @@ namespace Bzip2 {
         /// <param name="compressorThreads">Maximum number of block processing threads to use</param>
         /// <param name="isOwner">True if the underlying stream will be closed with the current Stream</param>
         /// <param name="blockLevel">The BZip2 block size as a multiple of 100,000 bytes (minimum 1, maximum 9)</param>
-        /// <remarks>When writing to the stream, data will be buffered into temporary byte arrays with
-        /// size a multiple of 80,000 bytes depending on the specified block multiplier.</remarks>
+        /// <remarks>For best performance, compressor thread number should be equal to CPU core count, but results may vary</remarks>
         public BZip2ParallelOutputStream(Stream output, int compressorThreads, bool isOwner = true, int blockLevel = 9)
         {
             this._outputStream = output;
@@ -84,11 +85,10 @@ namespace Bzip2 {
             this._mtCompressorThreads = compressorThreads;
 
             // supposedly a block can only expand 1.25x, so 0.8 of normal block size should always be safe...
-            this._readBlockSize = 80000 * this._blockLevel;
             this._compressBlockSize = 100000 * this._blockLevel;
             
-            // initialize initial temp buffer
-            this._currentBlockBuffer = new TempBlockBuffer(this._readBlockSize, this._mtNextInputBlockId++);
+            // initialize initial meta buffer
+            this._currentBlockBuffer = new BZip2BitMetaBuffer(this._compressBlockSize, this._mtNextInputBlockId++);
 
             this._isOwner = isOwner;
             
@@ -117,6 +117,11 @@ namespace Bzip2 {
 
         private bool TryWriteOutputBlockAndIncrementId()
         {
+            if (this._unsafeFatalException) {
+                throw new Exception("One of the compression threads somehow failed... This should never happen.");
+            }
+
+            
             try {
                 int blockId = this._mtNextOutputBlockId;
                 
@@ -163,7 +168,7 @@ namespace Bzip2 {
                     if (this._unsafeFatalException) return;
 
                     // temp input buffer
-                    TempBlockBuffer buff = null;
+                    BZip2BitMetaBuffer buff = null;
 
                     lock (this._syncRootProcesing)
                     {
@@ -179,26 +184,16 @@ namespace Bzip2 {
                     }
 
                     if (buff != null) {
-                        // initialize temporary buffer for output data...
-                        BZip2BitMetaBuffer meta = new BZip2BitMetaBuffer(this._readBlockSize);
+                        buff.CompressBytes();
                         
-                        // process the current block
-                        BZip2BlockCompressor compressor = new BZip2BlockCompressor(meta, this._compressBlockSize);
-                        int newCount = compressor.Write(buff.Buffer, 0, buff.Count);
-                        compressor.CloseBlock();
-                        
-                        // set CRC in temporary buffer
-                        meta.SetCrc(compressor.CRC);
-                        
-                        if (newCount != buff.Count) {
-                            // this should never happen unless _readBlockSize was too big?
-                            throw new Exception($"Could not write all the bytes for blockId {buff.BlockId}... This should never happen!");
-                        }
+                        // if (buff.DataPairCount > this._debugMaxMetaBufferDataPairCount) {
+                        //     this._debugMaxMetaBufferDataPairCount = buff.DataPairCount;
+                        // }
 
                         // add my block to the dictionary
                         lock (this._syncRootProcesing)
                         {
-                            this._mtProcessedBlocks.Add(buff.BlockId, meta);
+                            this._mtProcessedBlocks.Add(buff.BlockId, buff);
                         }
                     }
                     else
@@ -251,8 +246,8 @@ namespace Bzip2 {
             this._outputStream.Flush();
         }
         
-        private bool ProcessTemporaryBuffer() {
-            if (this._currentBlockBuffer.Count > 0)
+        private bool EnqueueCurrentBlockBuffer() {
+            if (this._currentBlockBuffer.LoadedBytes > 0)
             {
                 // make sure queue is not flooded with buffers, wait if that's the case...
                 while (true) {
@@ -272,7 +267,7 @@ namespace Bzip2 {
                 lock (this._syncRootProcesing)
                 {
                     this._mtPendingBlocksQueue.Enqueue(this._currentBlockBuffer);
-                    this._currentBlockBuffer = new TempBlockBuffer(this._readBlockSize, this._mtNextInputBlockId++);
+                    this._currentBlockBuffer = new BZip2BitMetaBuffer(this._compressBlockSize, this._mtNextInputBlockId++);
                 }
                 
                 // since we enqueued a buffer, make sure there's an active processing thread to deal with it
@@ -292,8 +287,8 @@ namespace Bzip2 {
             }
 
             // check if there is still data left to write
-            if (this._currentBlockBuffer.Count > 0) {
-                this.ProcessTemporaryBuffer();
+            if (this._currentBlockBuffer.LoadedBytes > 0) {
+                this.EnqueueCurrentBlockBuffer();
             }
 
             // decrement next input block since no longer getting another block
@@ -328,6 +323,8 @@ namespace Bzip2 {
 
             // finally, write the footer!
             this.WriteBz2FooterAndFlush();
+            
+            //Console.WriteLine($"Max number of data pair entries was {this._debugMaxMetaBufferDataPairCount}");
         }
         
         #region Implementation of abstract members of Stream
@@ -356,9 +353,11 @@ namespace Bzip2 {
         }
 
         public override void WriteByte(byte value) {
-            if (this._currentBlockBuffer.ReadByte(value) == 0) {
-                this.ProcessTemporaryBuffer();
-                this._currentBlockBuffer.ReadByte(value);
+            if (!this._currentBlockBuffer.LoadByte(value)) {
+                // byte could not be loaded, this happens when current block buffer is full
+                
+                this.EnqueueCurrentBlockBuffer();
+                this._currentBlockBuffer.LoadByte(value);
                 
                 // try writing output block and keep doing so while successful
                 while (this.TryWriteOutputBlockAndIncrementId()) { }
@@ -367,12 +366,14 @@ namespace Bzip2 {
 
         public override void Write(byte[] data, int offset, int length) {
             while (length > 0) {
-                int count = this._currentBlockBuffer.ReadBytes(data, offset, length);
-                offset += count;
-                length -= count;
+                if (!this._currentBlockBuffer.IsFull) {
+                    int count = this._currentBlockBuffer.LoadBytes(data, offset, length);
+                    offset += count;
+                    length -= count;
+                }
 
-                if (this._currentBlockBuffer.IsFinished) {
-                    this.ProcessTemporaryBuffer();
+                if (this._currentBlockBuffer.IsFull) {
+                    this.EnqueueCurrentBlockBuffer();
                 }
                 
                 // try writing output block and keep doing so while successful

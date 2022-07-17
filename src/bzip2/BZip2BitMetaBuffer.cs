@@ -27,6 +27,8 @@ namespace Bzip2
             }
         }
         
+        public int DataPairCount { get => this._data.Count; }
+        
         private List<Bzip2BitDataPair> _data;
 
         
@@ -35,22 +37,81 @@ namespace Bzip2
         /// </summary>
         public uint BlockCrc { get => this._blockCrc; }
         private uint _blockCrc = 0;
+
+        /// <summary>
+        /// Indicates that the compression block is full
+        /// </summary>
+        public bool IsFull { get => this._isFull; }
+        private bool _isFull = false;
+
+        /// <summary>
+        /// Block numeric id for distinguishing blocks 
+        /// </summary>
+        public int BlockId { get => this._blockId; }
+        private int _blockId;
+
+        /// <summary>
+        /// Number of bytes loaded into the block compressor
+        /// </summary>
+        public int LoadedBytes { get => this._loadedBytes; }
+        private int _loadedBytes = 0;
+        private BZip2BlockCompressor _compressor;
         
         /// <summary>
         /// Public constructor
         /// </summary>
-        /// <param name="internalListBufferCapacity">Initial internal buffer list capacity</param>
-        public BZip2BitMetaBuffer(int internalListBufferCapacity)
+        /// <param name="blockSizeBytes"><see cref="BZip2BlockCompressor"/> block size in bytes, also initial internal buffer list capacity</param>
+        /// <param name="blockId">Block number id, used to distinguish blocks in multithreadding</param>
+        public BZip2BitMetaBuffer(int blockSizeBytes, int blockId)
         {
-            this._data = new List<Bzip2BitDataPair>(internalListBufferCapacity);
+            this._data = new List<Bzip2BitDataPair>(blockSizeBytes);
+            this._blockId = blockId;
+            this._compressor = new BZip2BlockCompressor(this, blockSizeBytes);
         }
 
         /// <summary>
-        /// Set compressed block CRC when finished
+        /// Loads a byte into the <see cref="BZip2BlockCompressor"/>'s first RLE stage
         /// </summary>
-        /// <param name="crc">CRC value</param>
-        public void SetCrc(uint crc) {
-            this._blockCrc = crc;
+        /// <param name="value">Byte</param>
+        /// <returns>True if byte was loaded, false if byte could not be loaded because block compressor is full</returns>
+        public bool LoadByte(byte value) {
+            if (this._compressor.Write(value)) {
+                this._loadedBytes++;
+                return true;
+            }
+
+            // could not load the byte, means block is full
+            this._isFull = true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Loads bytes from a buffer into the <see cref="BZip2BlockCompressor"/>'s first RLE stage
+        /// </summary>
+        /// <param name="buff">Byte buffer</param>
+        /// <param name="offset">Byte buffer offset</param>
+        /// <param name="length">Number of bytes to load</param>
+        /// <returns>Number of bytes actually loaded</returns>
+        public int LoadBytes(byte[] buff, int offset, int length) {
+            int count = this._compressor.Write(buff, offset, length);
+            this._loadedBytes += count;
+            if (count < length) {
+                // could not load all the bytes, means block is full
+                this._isFull = true;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Starts the actual compression
+        /// </summary>
+        public void CompressBytes() {
+            this._compressor.CloseBlock();
+            this._blockCrc = this._compressor.CRC;
+            
+            // set compressor to null so it can be garbage collected later
+            this._compressor = null;
         }
         
         /// <summary>
