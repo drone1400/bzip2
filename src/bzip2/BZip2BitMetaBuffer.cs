@@ -75,6 +75,11 @@ namespace Bzip2
         /// <param name="value">Byte</param>
         /// <returns>True if byte was loaded, false if byte could not be loaded because block compressor is full</returns>
         public bool LoadByte(byte value) {
+            if (this._compressor == null)
+            {
+                return false;
+            }
+            
             if (this._compressor.Write(value)) {
                 this._loadedBytes++;
                 return true;
@@ -94,6 +99,11 @@ namespace Bzip2
         /// <param name="length">Number of bytes to load</param>
         /// <returns>Number of bytes actually loaded</returns>
         public int LoadBytes(byte[] buff, int offset, int length) {
+            if (this._compressor == null)
+            {
+                return 0;
+            }
+            
             int count = this._compressor.Write(buff, offset, length);
             this._loadedBytes += count;
             if (count < length) {
@@ -107,6 +117,11 @@ namespace Bzip2
         /// Starts the actual compression
         /// </summary>
         public void CompressBytes() {
+            if (this._compressor == null)
+            {
+                return;
+            }
+            
             this._compressor.CloseBlock();
             this._blockCrc = this._compressor.CRC;
             
