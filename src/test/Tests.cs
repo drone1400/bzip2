@@ -48,7 +48,7 @@ namespace Bzip2.test {
             for (int i = 0; i < buffer.Length; i++)
                 crc.UpdateCrc(buffer[i]);
 
-            Assert.Equal(crc.CRC, 0x8AEE127A);
+            Assert.Equal(0x8AEE127A, crc.CRC);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Bzip2.test {
         public void CrcAlgorithmSameValues() {
             var crc = new CRC32();
             crc.UpdateCrc(0x55, 10);
-            Assert.Equal(crc.CRC, 0xA1E07747);
+            Assert.Equal(0xA1E07747, crc.CRC);
         }
 
         /// <summary>
