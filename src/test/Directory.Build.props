@@ -1,5 +1,6 @@
 <Project>
     <PropertyGroup>
         <MSBUildProjectExtensionsPath>..\..\output.MsBuildProps\test\</MSBUildProjectExtensionsPath>
+        <BaseIntermediateOutputPath>..\..\output.test.obj\</BaseIntermediateOutputPath>
     </PropertyGroup>
 </Project>

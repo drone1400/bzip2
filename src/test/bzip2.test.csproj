@@ -11,7 +11,8 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 
-    <BaseIntermediateOutputPath>..\..\output.test.obj\</BaseIntermediateOutputPath>
+    <!-- BaseIntermediateOutputPath is set in Directory.Build.props !! -->
+    <!-- <BaseIntermediateOutputPath>..\..\output.test.obj\</BaseIntermediateOutputPath> -->
     <IntermediateOutputPath>..\..\output.test.obj\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</IntermediateOutputPath>
     <OutputPath>..\..\output.test\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</OutputPath>
     <WarningLevel>4</WarningLevel>
