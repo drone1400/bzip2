@@ -4,6 +4,7 @@
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
 
 using System;
+using System.IO;
 
 namespace Bzip2
 {
@@ -73,7 +74,7 @@ namespace Bzip2
         /// Decodes and returns the next symbol
         /// </summary>
         /// <returns>The decoded symbol</returns>
-        /// <exception cref="Exception">if the end of the input stream is reached while decoding</exception>
+        /// <exception cref="IOException">if the end of the input stream is reached while decoding</exception>
         public int NextSymbol()
         {
             // Move to next group selector if required
@@ -81,7 +82,7 @@ namespace Bzip2
             {
                 this.groupIndex++;
                 if (this.groupIndex == this.selectors.Length)
-                    throw new Exception("Error decoding BZip2 block");
+                    throw new IOException("Error decoding BZip2 block");
 
                 this.currentTable = this.selectors[this.groupIndex] & 0xff;
             }
@@ -101,7 +102,7 @@ namespace Bzip2
             }
 
             // A valid code was not recognised
-            throw new Exception("Error decoding BZip2 block");
+            throw new IOException("Error decoding BZip2 block");
         }
 
         #endregion

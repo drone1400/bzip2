@@ -125,7 +125,7 @@ namespace Bzip2
         {
             if (this._unsafeFatalException)
             {
-                throw new Exception("One of the compression threads somehow failed... This should never happen.");
+                throw new IOException("One of the compression threads somehow failed... This should never happen.");
             }
 
 
@@ -161,7 +161,7 @@ namespace Bzip2
                 this._unsafeFatalException = true;
 
                 // rethrow exception, hopefully something catches it?...
-                throw new Exception("BZip2 error writing output data! See inner exception for details!", ex);
+                throw new IOException("BZip2 error writing output data! See inner exception for details!", ex);
             }
         }
 
@@ -212,7 +212,7 @@ namespace Bzip2
                 // set this without any locks...
                 this._unsafeFatalException = true;
 
-                throw new Exception("BZip2 Processing thread somehow crashed... See inner exception for details!", ex);
+                throw new IOException("BZip2 Processing thread somehow crashed... See inner exception for details!", ex);
             } finally
             {
                 lock (this._syncRootActiveThread)
@@ -333,7 +333,7 @@ namespace Bzip2
                     this._mtPendingBlocksQueue.Count > 0 ||
                     this._mtProcessedBlocks.Count > 0)
                 {
-                    throw new Exception("BZip2 dispose operation sanity check failed!...");
+                    throw new IOException("BZip2 dispose operation sanity check failed!...");
                 }
             }
 

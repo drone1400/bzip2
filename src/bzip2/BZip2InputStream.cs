@@ -155,12 +155,12 @@ namespace Bzip2
         #region Private methods
 
         /// <summary>Reads the stream header and checks that the data appears to be a valid BZip2 stream</summary>
-        /// <exception>if the stream header is not valid</exception>
+        /// <exception cref="IOException">if the stream header is not valid</exception>
         private void InitialiseStream()
         {
             // If the stream has been explicitly closed, throw an exception
             if (this.bitInputStream == null)
-                throw new Exception ("Stream closed");
+                throw new IOException("Stream closed");
 
             // If we're already at the end of the stream, do nothing
             if (this.streamComplete)
@@ -177,7 +177,7 @@ namespace Bzip2
                     || (marker2 != BZip2OutputStream.STREAM_START_MARKER_2)
                     || (blockSize < 1) || (blockSize > 9))
                 {
-                    throw new Exception ("Invalid BZip2 header");
+                    throw new IOException("Invalid BZip2 header");
                 }
 
                 this.streamBlockSize = blockSize * 100000;
@@ -193,7 +193,7 @@ namespace Bzip2
         /// <remarks>If a previous block has completed, its CRC is checked and merged into the stream CRC.
         /// If the previous block was the final block in the stream, the stream CRC is validated</remarks>
         /// <return>true if a block was successfully initialised, or false if the end of file marker was encountered</return>
-        /// <exception>If either the block or stream CRC check failed, if the following data is
+        /// <exception cref="IOException">If either the block or stream CRC check failed, if the following data is
         /// not a valid block-header or end-of-file marker, or if the following block could not be decoded</exception>
         private bool InitialiseNextBlock()
         {
@@ -234,14 +234,14 @@ namespace Bzip2
                 uint storedCombinedCRC = this.bitInputStream.ReadInteger(); // .ReadBits(32);
 
                 if (storedCombinedCRC != this.streamCRC)
-                    throw new Exception ("BZip2 stream CRC error");
+                    throw new IOException("BZip2 stream CRC error");
 
                 return false;
             }
 
             // If what was read is not a valid block-header or end-of-stream marker, the stream is broken
             this.streamComplete = true;
-            throw new Exception ("BZip2 stream format error");
+            throw new IOException("BZip2 stream format error");
         }
 
         #endregion

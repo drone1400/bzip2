@@ -4,6 +4,7 @@
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
 
 using System;
+using System.IO;
 
 namespace Bzip2
 {
@@ -179,8 +180,8 @@ namespace Bzip2
         /// <summary>
         /// Read and decode the block's Huffman tables
         /// @return A decoder for the Huffman stage that uses the decoded tables
-        /// Exception if the input stream reaches EOF before all table data has been read
         /// </summary>
+        /// <exception cref="IOException">if the input stream reaches EOF before all table data has been read</exception>
         private BZip2HuffmanStageDecoder ReadHuffmanTables()
         {
             var tableCodeLengths = new byte[HUFFMAN_MAXIMUM_TABLES, BZip2MTFAndRLE2StageEncoder.HUFFMAN_MAXIMUM_ALPHABET_SIZE];
@@ -212,7 +213,7 @@ namespace Bzip2
                 || (totalSelectors < 1)
                 || (totalSelectors > HUFFMAN_MAXIMUM_SELECTORS))
             {
-                throw new Exception("BZip2 block Huffman tables invalid");
+                throw new IOException("BZip2 block Huffman tables invalid");
             }
 
             // Read and decode MTFed Huffman selector list
@@ -244,8 +245,8 @@ namespace Bzip2
         /// Reads the Huffman encoded data from the input stream, performs Run-Length Decoding and
         /// applies the Move To Front transform to reconstruct the Burrows-Wheeler Transform array
         /// @param huffmanDecoder The Huffman decoder through which symbols are read
-        /// Exception if an end-of-block symbol was not decoded within the declared block size
         /// </summary>
+        /// <exception cref="IOException">if an end-of-block symbol was not decoded within the declared block size</exception>
         private void DecodeHuffmanData(BZip2HuffmanStageDecoder huffmanDecoder)
         {
             var symbolMTF = new MoveToFront();
@@ -272,7 +273,7 @@ namespace Bzip2
                     if (repeatCount > 0)
                     {
                         if (_bwtBlockLength + repeatCount > this.bwtBlock.Length)
-                            throw new Exception("BZip2 block exceeds declared block size");
+                            throw new IOException("BZip2 block exceeds declared block size");
 
                         nextByte = huffmanSymbolMap[mtfValue];
                         bwtByteCounts[nextByte & 0xff] += repeatCount;
@@ -289,7 +290,7 @@ namespace Bzip2
                         break;
 
                     if (_bwtBlockLength >= this.bwtBlock.Length)
-                        throw new Exception("BZip2 block exceeds declared block size");
+                        throw new IOException("BZip2 block exceeds declared block size");
 
                     mtfValue = symbolMTF.IndexToFront(nextSymbol - 1) & 0xff;
 
@@ -305,15 +306,15 @@ namespace Bzip2
         /// <summary>
         /// Set up the Inverse Burrows-Wheeler Transform merged pointer array
         /// @param bwtStartPointer The start pointer into the BWT array
-        /// Exception if the given start pointer is invalid
         /// </summary>
+        /// <exception cref="IOException">if the given start pointer is invalid</exception>
         private void InitialiseInverseBWT(uint bwtStartPointer)
         {
             var _bwtMergedPointers = new int[this.bwtBlockLength];
             var characterBase = new int[256];
 
             if ((bwtStartPointer < 0) || (bwtStartPointer >= this.bwtBlockLength))
-                throw new Exception("BZip2 start pointer invalid");
+                throw new IOException("BZip2 start pointer invalid");
 
             // Cumulatise character counts
             Array.ConstrainedCopy(this.bwtByteCounts, 0, characterBase, 1, 255);
@@ -372,7 +373,7 @@ namespace Bzip2
         /// </summary>
         /// <param name="bitInputStream">The BZip2BitInputStream to read from</param>
         /// <param name="blockSize">The maximum decoded size of the block</param>
-        /// <exception cref="Exception">If the block could not be decoded</exception>
+        /// <exception cref="IOException">If the block could not be decoded</exception>
         public BZip2BlockDecompressor(BZip2BitInputStream bitInputStream, uint blockSize)
         {
             this.bitInputStream = bitInputStream;
@@ -458,11 +459,11 @@ namespace Bzip2
         /// Verify and return the block CRC. This method may only be called after all of the block's bytes have been read
         /// </summary>
         /// <returns>The block CRC</returns>
-        /// <exception cref="Exception">if the CRC verification failed</exception>
+        /// <exception cref="IOException">if the CRC verification failed</exception>
         public uint CheckCrc()
         {
             if (this.blockCRC != this.crc.CRC)
-                throw new Exception("BZip2 block CRC error");
+                throw new IOException("BZip2 block CRC error");
 
             return this.crc.CRC;
         }

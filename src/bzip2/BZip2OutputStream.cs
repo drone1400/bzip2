@@ -125,10 +125,10 @@ namespace Bzip2
         public override void WriteByte(byte value)
         {
             if (this.outputStream == null)
-                throw new Exception("Stream closed");
+                throw new IOException("Stream closed");
 
             if (this.streamFinished)
-                throw new Exception("Write beyond end of stream");
+                throw new IOException("Write beyond end of stream");
 
             if (!this.blockCompressor.Write(value & 0xff))
             {
@@ -141,10 +141,10 @@ namespace Bzip2
         public override void Write(byte[] data, int offset, int length)
         {
             if (this.outputStream == null)
-                throw new Exception("Stream closed");
+                throw new IOException("Stream closed");
 
             if (this.streamFinished)
-                throw new Exception("Write beyond end of stream");
+                throw new IOException("Write beyond end of stream");
 
             while (length > 0)
             {
