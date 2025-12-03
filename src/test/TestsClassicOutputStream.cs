@@ -153,7 +153,7 @@ namespace Bzip2.test
                 input.CopyTo(fs);
                 fs.Flush();
                 fs.Close();
-                Assert.True(false, $"Exception was thrown... {ex}");
+                Assert.Fail($"Exception was thrown... {ex}");
             }
 
             for (int i = 0; i < inputBuffer.Length; i++) {
@@ -164,7 +164,7 @@ namespace Bzip2.test
                     input.CopyTo(fs);
                     fs.Flush();
                     fs.Close();
-                    Assert.True(false, $"bytes differ at position {i}");
+                    Assert.Fail($"bytes differ at position {i}");
                 }
             }
 

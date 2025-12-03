@@ -119,7 +119,7 @@ namespace Bzip2.test {
             output2.Position = 0;
             for (int i = 0; i < Buffer.Length; i++) {
                 if (Buffer[i] != (byte)output2.ReadByte()) {
-                    Assert.True(false, $"bytes differ at position {i}");
+                    Assert.Fail($"bytes differ at position {i}");
                 }
             }
         }

@@ -54,13 +54,13 @@ namespace Bzip2.test {
             using (FileStream fstest1 = new FileStream(pathOut1, FileMode.Open, FileAccess.Read))
             using (FileStream fstest2 = new FileStream(pathOut2, FileMode.Open, FileAccess.Read)) {
                 if (fstest1.Length != fstest2.Length) {
-                    Assert.True(false, "Output streams length mismatch...");
+                    Assert.Fail("Output streams length mismatch...");
                 }
 
                 for (long i = 0; i < fstest1.Length; i++) {
                     int b1 = fstest1.ReadByte();
                     if (b1 != fstest2.ReadByte()) {
-                        Assert.True(false, $"Output stream difference between Stream 1 and 2 at byte index {i}");
+                        Assert.Fail($"Output stream difference between Stream 1 and 2 at byte index {i}");
                     }
                 }
             }
@@ -111,7 +111,7 @@ namespace Bzip2.test {
                 input.CopyTo(fs);
                 fs.Flush();
                 fs.Close();
-                Assert.True(false, $"Exception was thrown... {ex}");
+                Assert.Fail($"Exception was thrown... {ex}");
             }
 
             input.Position = 0;
@@ -124,7 +124,7 @@ namespace Bzip2.test {
                     input.CopyTo(fs);
                     fs.Flush();
                     fs.Close();
-                    Assert.True(false, $"bytes differ at position {i}");
+                    Assert.Fail($"bytes differ at position {i}");
                 }
             }
 
