@@ -360,19 +360,19 @@ namespace Bzip2
 
         public override void Flush()
         {
-            throw new NotSupportedException("BZip2ParallelOutputStream does not support 'Flush()' method! Just use 'Close()' instead.");
+            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Flush()' method! Just use 'Close()' instead.");
         }
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotSupportedException("BZip2ParallelOutputStream does not support 'Seek(long offset, SeekOrigin origin)' method.");
+            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
         }
         public override void SetLength(long value)
         {
-            throw new NotSupportedException("BZip2ParallelOutputStream does not support 'SetLength(long value)' method.");
+            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'SetLength(long value)' method.");
         }
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException("BZip2ParallelOutputStream does not support 'Read(byte[] buffer, int offset, int count)' method.");
+            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Read(byte[] buffer, int offset, int count)' method.");
         }
 
         public override void WriteByte(byte value)
@@ -430,7 +430,7 @@ namespace Bzip2
         public override long Position
         {
             get => this._outputStream.Position;
-            set => throw new NotSupportedException("BZip2ParallelOutputStream does not support Set operation for property 'Position'.");
+            set => throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support Set operation for property 'Position'.");
         }
 
 
