@@ -440,6 +440,33 @@ namespace Bzip2
             return i;
         }
         
+        public int Read(Stream x, int maxLength)
+        {
+            int i;
+            for (i = 0; i < maxLength; i++)
+            {
+                var decoded = this.Read();
+                if (decoded == -1)
+                    return (i == 0) ? -1 : i;
+
+                x.WriteByte((byte)decoded);
+            }
+            return i;
+        }
+        
+        public int ReadAll(Stream x)
+        {
+            int count = 0;
+            while (true)
+            {
+                var decoded = this.Read();
+                if (decoded == -1)
+                    return (count == 0) ? -1 : count;
+                count++;
+                x.WriteByte((byte)decoded);
+            }
+        }
+        
         /// <summary>
         /// Verify and return the block CRC. This method may only be called after all of the block's bytes have been read
         /// </summary>

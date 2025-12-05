@@ -25,4 +25,19 @@ namespace Bzip2 {
         // Last three bytes of the block header marker
         public const uint BLOCK_HEADER_MARKER_2 = 0x265359;
     }
+    
+    public enum InputStreamHeaderCheckType
+    {
+        // check for full header (ex: BZh9 )
+        FullHeader,
+            
+        // skips BZ part of header
+        NoBz,
+            
+        // skips BZh part of header
+        NoBzh,
+            
+        // skips BZh and block level, aka the whole header
+        NoHeader,
+    }
 }

@@ -7,18 +7,20 @@ namespace Bzip2.test
 {
     public static class TestCommon
     {
-        
+
         /// <summary>
         /// Common test routine for Multi Threaded compression + Single Threaded decompression
         /// </summary>
         /// <param name="console"><see cref="ITestOutputHelper"/></param>
         /// <param name="inputStream">Input stream, must be seekable</param>
+        /// <param name="compressMultiThread">If true, will use Parallel Compressor</param>
+        /// <param name="decompressMultiThread">If true, will use Parallel Decompressor</param>
         /// <param name="threads">Maximum number of threads to use for compression, if 0 will use Environment.ProcessorCount</param>
         /// <param name="outputBufferSize">Size for temporary output memory buffer</param>
         /// <param name="copyBufferSize">Size for temporary copy buffer</param>
         /// <param name="saveFileOnFail">If true, will save inputStream data to a file</param>
-        /// <returns>(Time Compression MultiThread, Time Decompression SingleThread)</returns>
-        public static (double, double) TestCommon_CMT_DST(ITestOutputHelper console, Stream inputStream, int threads = 0, int outputBufferSize = 8388608, int copyBufferSize = 8388608, bool saveFileOnFail = false)
+        /// <returns>(Time Compression, Time Decompression)</returns>
+        public static (double, double) GenericTest(ITestOutputHelper console, Stream inputStream, bool compressMultiThread, bool decompressMultiThread, int outputBufferSize = 8388608, int copyBufferSize = 8388608, bool saveFileOnFail = false)
         {
             void DebugSaveInputStream()
             {
@@ -31,13 +33,8 @@ namespace Bzip2.test
                 fs.Close();
             }
             
-            double timeCMT = 0;
-            double timeDST = 0;
-
-            if (threads == 0)
-            {
-                threads = Environment.ProcessorCount;
-            }
+            double timeCompress = 0;
+            double timeDecompress = 0;
             
             using MemoryStream output = new MemoryStream(outputBufferSize);
             using MemoryStream outputDecompressed = new MemoryStream(outputBufferSize);
@@ -45,26 +42,30 @@ namespace Bzip2.test
             try
             {
                 // compress input
-                Stopwatch swCMT = new Stopwatch();
-                swCMT.Start();
-                using BZip2ParallelOutputStream compressor = new BZip2ParallelOutputStream(output, false, 9);
+                Stopwatch swCompress = new Stopwatch();
+                swCompress.Start();
+                using Stream compressor = compressMultiThread
+                    ? new BZip2ParallelOutputStream(output, false, 9)
+                    : new BZip2OutputStream(output, false, 9);
                 inputStream.CopyTo(compressor, copyBufferSize);
                 compressor.Close();
-                swCMT.Stop();
-                timeCMT = swCMT.ElapsedMilliseconds;
-                console.WriteLine($"    {timeCMT} ms MT compression time... ");
+                swCompress.Stop();
+                timeCompress = swCompress.ElapsedMilliseconds;
+                console.WriteLine($"    {timeCompress} ms {(compressMultiThread ? "MT": "ST")} compression time... ");
 
                 // reset output position
                 output.Position = 0;
                 
                 // decompress output
-                Stopwatch swDST = new Stopwatch();
-                swDST.Start();
-                using BZip2InputStream decompressor = new BZip2InputStream(output, false);
+                Stopwatch SwDecompress = new Stopwatch();
+                SwDecompress.Start();
+                using Stream decompressor = decompressMultiThread
+                    ? new BZip2ParallelInputStream(output, false)
+                    : new BZip2InputStream(output, false);
                 decompressor.CopyTo(outputDecompressed, copyBufferSize);
-                swDST.Stop();
-                timeDST = swDST.ElapsedMilliseconds;
-                console.WriteLine($"    {timeDST} ms ST decompression time");
+                SwDecompress.Stop();
+                timeDecompress = SwDecompress.ElapsedMilliseconds;
+                console.WriteLine($"    {timeDecompress} ms {(decompressMultiThread ? "MT": "ST")} decompression time");
             } catch (Exception ex)
             {
                 if (saveFileOnFail)
@@ -97,100 +98,7 @@ namespace Bzip2.test
                 }
             }
 
-            return (timeCMT, timeDST);
-        }
-        
-        /// <summary>
-        /// Common test routine for Single Threaded compression + Single Threaded decompression
-        /// </summary>
-        /// <param name="console"><see cref="ITestOutputHelper"/></param>
-        /// <param name="inputStream">Input stream, must be seekable</param>
-        /// <param name="threads">Maximum number of threads to use for compression, if 0 will use Environment.ProcessorCount</param>
-        /// <param name="outputBufferSize">Size for temporary output memory buffer</param>
-        /// <param name="copyBufferSize">Size for temporary copy buffer</param>
-        /// <param name="saveFileOnFail">If true, will save inputStream data to a file</param>
-        /// <returns>(Time Compression Single Thread, Time Decompression Single Thread)</returns>
-        public static (double, double) TestCommon_CST_DST(ITestOutputHelper console, Stream inputStream, int threads = 0, int outputBufferSize = 8388608, int copyBufferSize = 8388608, bool saveFileOnFail = false)
-        {
-            void DebugSaveInputStream()
-            {
-                string randomFile = Path.GetRandomFileName();
-                console.WriteLine($"    Saving input data to {randomFile}");
-                using FileStream fs = new FileStream(randomFile, FileMode.Create, FileAccess.Write);
-                inputStream.Position = 0;
-                inputStream.CopyTo(fs);
-                fs.Flush();
-                fs.Close();
-            }
-            
-            double timeCST = 0;
-            double timeDST = 0;
-
-            if (threads == 0)
-            {
-                threads = Environment.ProcessorCount;
-            }
-            
-            using MemoryStream output = new MemoryStream(outputBufferSize);
-            using MemoryStream outputDecompressed = new MemoryStream(outputBufferSize);
-            
-            try
-            {
-                // compress input
-                Stopwatch swCST = new Stopwatch();
-                swCST.Start();
-                using BZip2OutputStream compressor = new BZip2OutputStream(output, false, 9);
-                inputStream.CopyTo(compressor, copyBufferSize);
-                compressor.Close();
-                swCST.Stop();
-                timeCST = swCST.ElapsedMilliseconds;
-                console.WriteLine($"    {timeCST} ms MT compression time... ");
-                
-                
-                // reset output position
-                output.Position = 0;
-                
-                // decompress output
-                Stopwatch swDST = new Stopwatch();
-                swDST.Start();
-                using BZip2InputStream decompressor = new BZip2InputStream(output, false);
-                decompressor.CopyTo(outputDecompressed, copyBufferSize);
-                swDST.Stop();
-                timeDST = swDST.ElapsedMilliseconds;
-                console.WriteLine($"    {timeDST} ms ST decompression time");
-            } catch (Exception ex)
-            {
-                if (saveFileOnFail)
-                {
-                    DebugSaveInputStream();
-                }
-                
-                Assert.Fail($"Exception was thrown... {ex}");
-            }
-
-            if (inputStream.Length != outputDecompressed.Length)
-            {
-                Assert.Fail($"Decompressed stream length mismatch, expecting {inputStream.Length}, got {outputDecompressed.Length}");
-            }
-            
-            inputStream.Position = 0;
-            outputDecompressed.Position = 0;
-            
-            for (int i = 0; i < inputStream.Length; i++)
-            {
-                int expect = inputStream.ReadByte();
-                int value = outputDecompressed.ReadByte();
-                if ( expect != value)
-                {
-                    if (saveFileOnFail)
-                    {
-                        DebugSaveInputStream();
-                        Assert.Fail($"bytes differ at position {i}, expected {expect}, got {value}");
-                    }
-                }
-            }
-
-            return (timeCST, timeDST);
+            return (timeCompress, timeDecompress);
         }
 
         public enum RandomDataMode
@@ -265,20 +173,22 @@ namespace Bzip2.test
                     default: throw new Exception("Unknown test mode");
                     case TestMode.CMT_DMT:
                     {
-                        throw new NotImplementedException();
+                        (timeC, timeD) = GenericTest(console, ms, true, true, outBufferSize, copyBufferSize, true);
+                        break;
                     }
                     case TestMode.CST_DMT:
                     {
-                        throw new NotImplementedException();
+                        (timeC, timeD) = GenericTest(console, ms, false, true, outBufferSize, copyBufferSize, true);
+                        break;
                     }
                     case TestMode.CST_DST:
                     {
-                        (timeC, timeD) = TestCommon_CST_DST(console, ms, Environment.ProcessorCount, outBufferSize, copyBufferSize, true);
+                        (timeC, timeD) = GenericTest(console, ms, false, false, outBufferSize, copyBufferSize, true);
                         break;
                     }
                     case TestMode.CMT_DST:
                     {
-                        (timeC, timeD) = TestCommon_CMT_DST(console, ms, Environment.ProcessorCount, outBufferSize, copyBufferSize, true);
+                        (timeC, timeD) = GenericTest(console, ms, true, false, outBufferSize, copyBufferSize, true);
                         break;
                     }
                 }

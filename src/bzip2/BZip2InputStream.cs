@@ -13,21 +13,6 @@ namespace Bzip2
     /// <remarks>Instances of this class are not threadsafe</remarks>
     public class BZip2InputStream : Stream
     {
-        public enum HeaderCheckType
-        {
-            // check for full header (ex: BZh9 )
-            FullHeader,
-            
-            // skips BZ part of header
-            NoBz,
-            
-            // skips BZh part of header
-            NoBzh,
-            
-            // skips BZh and block level, aka the whole header
-            NoHeader,
-        }
-        
         // The stream from which compressed BZip2 data is read and decoded
         private Stream _inputStream;
         
@@ -59,16 +44,16 @@ namespace Bzip2
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The InputStream to wrap</param>
         /// <param name="isOwner">if true, will close the stream when done</param>
-        /// <param name="headerCheck"><see cref="HeaderCheckType"/></param>
-        /// <param name="manualBlockLevel">Used when <see cref="headerCheck"/> is NoHeader</param>
-        public BZip2InputStream(Stream inputStream, bool isOwner = true, HeaderCheckType headerCheck = HeaderCheckType.FullHeader, int manualBlockLevel = 9)
+        /// <param name="inputStreamHeaderCheck"><see cref="InputStreamHeaderCheckType"/></param>
+        /// <param name="manualBlockLevel">Used when <see cref="inputStreamHeaderCheck"/> is NoHeader</param>
+        public BZip2InputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9)
         {
             this._inputStream = inputStream ?? throw new ArgumentException("Null input stream");
             this._bitInputStream = new BZip2BitInputStream(inputStream);
             this._isOwner = isOwner;
 
             // initialize stream immediately
-            this.InitializeStream(headerCheck, manualBlockLevel);
+            this.InitializeStream(inputStreamHeaderCheck, manualBlockLevel);
             // prepare first block
             this.InitializeNextBlock();
         }
@@ -164,7 +149,7 @@ namespace Bzip2
 
         /// <summary>Reads the stream header and checks that the data appears to be a valid BZip2 stream</summary>
         /// <exception cref="IOException">if the stream header is not valid</exception>
-        private void InitializeStream(HeaderCheckType headerCheck, int blockLevel) 
+        private void InitializeStream(InputStreamHeaderCheckType inputStreamHeaderCheck, int blockLevel) 
         {
             /* If the stream has been explicitly closed, throw an exception */
             if (this._bitInputStream == null)
@@ -177,9 +162,9 @@ namespace Bzip2
             // Read the stream header
             try
             {
-                switch (headerCheck)
+                switch (inputStreamHeaderCheck)
                 {
-                    case HeaderCheckType.FullHeader:
+                    case InputStreamHeaderCheckType.FullHeader:
                     {
                         uint marker1 = this._bitInputStream.ReadBits(16);
                         uint marker2 = this._bitInputStream.ReadBits(8);
@@ -192,7 +177,7 @@ namespace Bzip2
                         }
                         break;
                     }
-                    case HeaderCheckType.NoBz:
+                    case InputStreamHeaderCheckType.NoBz:
                     {
                         uint marker2 = this._bitInputStream.ReadBits(8);
                         blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
@@ -203,7 +188,7 @@ namespace Bzip2
                         }
                         break;
                     }
-                    case HeaderCheckType.NoBzh:
+                    case InputStreamHeaderCheckType.NoBzh:
                     {
                         blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
                         if (blockLevel < 1 ||  blockLevel > 9)
