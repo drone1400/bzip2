@@ -61,6 +61,11 @@ namespace Bzip2
             this.inputStream = inputStream;
             this.bitInputStream = new BZip2BitInputStream(inputStream);
             this.headerless = headerless;
+
+            // initialize stream immediately
+            this.InitializeStream();
+            // prepare first block
+            this.InitializeNextBlock();
         }
 
         #endregion
@@ -94,37 +99,36 @@ namespace Bzip2
             set =>throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support Set operation for property 'Position'.");
         }
 
-        public override int ReadByte()
+        public override int ReadByte() 
         {
-            var nextByte = -1;
-            if (this.blockDecompressor == null)
-                this.InitialiseStream();
-            else
-                nextByte = this.blockDecompressor.Read();
-
-            if (nextByte != -1)
-                return nextByte;
-
-            if (this.InitialiseNextBlock())
-                nextByte = this.blockDecompressor.Read();
+            var nextByte = this.blockDecompressor.Read();
+            
+            // if current block has reached its end, prepare next block and try reading again
+            if (nextByte == -1) 
+            {
+                if (this.InitializeNextBlock()) 
+                {
+                    nextByte = this.blockDecompressor.Read();
+                }
+            }
 
             return nextByte;
         }
 
-        public override int Read(byte[] destination,  int offset,  int length)
+        public override int Read(byte[] destination,  int offset,  int length) 
         {
-            var bytesRead = -1;
-            if (this.blockDecompressor == null)
-                this.InitialiseStream();
-            else
-                bytesRead = this.blockDecompressor.Read(destination, offset, length);
+            int bytesRead = this.blockDecompressor.Read(destination, offset, length);
 
-            if (bytesRead != -1)
-                return bytesRead;
-            bytesRead = 0;
+            // if current block has reached its end, prepare next block and try reading again
+            if (bytesRead == -1) 
+            {
+                if (this.InitializeNextBlock()) 
+                {
+                    bytesRead = this.blockDecompressor.Read(destination, offset, length);
+                }
+            }
 
-            if (this.InitialiseNextBlock())
-                bytesRead = this.blockDecompressor.Read(destination, offset, length);
+            if (bytesRead == -1) bytesRead = 0;
 
             return bytesRead;
         }
@@ -156,9 +160,9 @@ namespace Bzip2
 
         /// <summary>Reads the stream header and checks that the data appears to be a valid BZip2 stream</summary>
         /// <exception cref="IOException">if the stream header is not valid</exception>
-        private void InitialiseStream()
+        private void InitializeStream() 
         {
-            // If the stream has been explicitly closed, throw an exception
+            /* If the stream has been explicitly closed, throw an exception */
             if (this.bitInputStream == null)
                 throw new IOException("Stream closed");
 
@@ -195,7 +199,7 @@ namespace Bzip2
         /// <return>true if a block was successfully initialised, or false if the end of file marker was encountered</return>
         /// <exception cref="IOException">If either the block or stream CRC check failed, if the following data is
         /// not a valid block-header or end-of-file marker, or if the following block could not be decoded</exception>
-        private bool InitialiseNextBlock()
+        private bool InitializeNextBlock()
         {
 
             // If we're already at the end of the stream, do nothing
