@@ -22,8 +22,6 @@ namespace Bzip2
     /// </remarks>
     internal class BZip2BlockDecompressor
     {
-        #region Private fields
-
         /// <summary>
         /// The BZip2 specification originally included the optional addition of a slight pseudo-random
         /// perturbation to the input data, in order to work around the block sorting algorithm's non-
@@ -163,19 +161,11 @@ namespace Bzip2
         // If the current block is randomised, the remaining count at the current RNUMS position
         private int randomCount = RNUMS[0] - 1;
 
-        #endregion
-
-        #region Public fields
-
         // Minimum number of alternative Huffman tables
         public const int HUFFMAN_MINIMUM_TABLES = 2;
 
         // Maximum number of alternative Huffman tables
         public const int HUFFMAN_MAXIMUM_TABLES = 6;
-
-        #endregion
-
-        #region Private methods
 
         /// <summary>
         /// Read and decode the block's Huffman tables
@@ -363,11 +353,6 @@ namespace Bzip2
             return nextDecodedByte;
         }
 
-        #endregion
-
-        #region Public methods
-
-
         /// <summary>
         /// Public constructor
         /// </summary>
@@ -467,7 +452,5 @@ namespace Bzip2
 
             return this.crc.CRC;
         }
-
-        #endregion
     }
 }

@@ -13,8 +13,6 @@ namespace Bzip2
     /// </summary>
     internal class BZip2HuffmanStageDecoder
     {
-        #region Private fields
-
         // The BZip2BitInputStream from which Huffman codes are read
         private readonly BZip2BitInputStream bitInputStream;
 
@@ -50,10 +48,6 @@ namespace Bzip2
 
         // The byte position within the current group. A new group is selected every 50 decoded bytes
         private int groupPosition = -1;
-
-        #endregion
-
-        #region Public methods
 
         /// <summary>
         /// Public constructor
@@ -104,11 +98,7 @@ namespace Bzip2
             // A valid code was not recognised
             throw new IOException("Error decoding BZip2 block");
         }
-
-        #endregion
-
-        #region Private methods
-
+        
         /// <summary>
         /// Constructs Huffman decoding tables from lists of Canonical Huffman code lengths
         /// </summary>
@@ -161,7 +151,5 @@ namespace Bzip2
                 }
             }
         }
-
-        #endregion
     }
 }

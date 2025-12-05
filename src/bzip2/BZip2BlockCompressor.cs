@@ -20,8 +20,6 @@ namespace Bzip2
     /// </remarks>
     internal class BZip2BlockCompressor
     {
-        #region Private fields
-
         // The stream to which compressed BZip2 data is written
         private readonly IBZip2BitOutputStream bitOutputStream;
 
@@ -50,10 +48,6 @@ namespace Bzip2
         // The repeat count of the current RLE value
         private int rleLength;
 
-        #endregion
-
-        #region Public properties
-
         /// <summary>
         /// Determines if any bytes have been written to the block.
         /// True if one or more bytes has been written to the block, otherwise false.
@@ -70,12 +64,7 @@ namespace Bzip2
         {
             get { return this.crc.CRC; }
         }
-
-        #endregion
-
-        #region Public methods
-
-
+        
         /// <summary>
         /// Public constructor
         /// </summary>
@@ -183,10 +172,6 @@ namespace Bzip2
             huffmanEncoder.Encode();
         }
 
-        #endregion
-
-        #region Private methods
-
         /// <summary>
         /// Write the Huffman symbol to output byte map
         /// </summary>
@@ -266,7 +251,5 @@ namespace Bzip2
                     break;
             }
         }
-
-        #endregion
     }
 }

@@ -12,8 +12,6 @@ namespace Bzip2
     /// </remarks>
     internal class BZip2MTFAndRLE2StageEncoder
     {
-        #region Private fields
-
         // The Burrows-Wheeler transformed block
         private readonly int[] bwtBlock;
 
@@ -28,11 +26,7 @@ namespace Bzip2
 
         // The global frequencies of values within the mtfBlock array
         private readonly int[] mtfSymbolFrequencies = new int[HUFFMAN_MAXIMUM_ALPHABET_SIZE];
-
-        #endregion
-
-        #region Public fields
-
+        
         // Maximum possible Huffman alphabet size
         public const int HUFFMAN_MAXIMUM_ALPHABET_SIZE = 258;
 
@@ -41,11 +35,7 @@ namespace Bzip2
 
         // Huffman symbol used for run-length encoding
         public const ushort RLE_SYMBOL_RUNB = 1;
-
-        #endregion
-
-        #region Public properties
-
+        
         // Gets the encoded MTF block
         public ushort[] MtfBlock
         {
@@ -69,10 +59,6 @@ namespace Bzip2
                 return this.mtfSymbolFrequencies;
             }
         }
-
-        #endregion
-
-        #region Public methods
 
         /// <summary>
         /// Public constructor
@@ -178,7 +164,5 @@ namespace Bzip2
             this.MtfAlphabetSize = endOfBlockSymbol + 1;
 
         }
-
-        #endregion
     }
 }

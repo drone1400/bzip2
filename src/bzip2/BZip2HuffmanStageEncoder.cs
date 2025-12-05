@@ -13,8 +13,6 @@ namespace Bzip2
     /// </summary>	 
     internal class BZip2HuffmanStageEncoder
     {
-        #region Private fields
-
         // Used in initial Huffman table generation
         private const int HUFFMAN_HIGH_SYMBOL_COST = 15;
 
@@ -47,11 +45,7 @@ namespace Bzip2
 
         // The selectors for each segment
         private readonly byte[] selectors;
-
-        #endregion
-
-        #region Public methods
-
+        
         /// <summary>
         /// Public constructor
         /// </summary>
@@ -93,11 +87,6 @@ namespace Bzip2
             this.writeSelectorsAndHuffmanTables();
             this.writeBlockData();
         }
-
-        #endregion
-
-        #region Private methods
-
 
         /// <summary>
         /// Selects an appropriate table count for a given MTF length
@@ -351,7 +340,5 @@ namespace Bzip2
                 }
             }
         }
-
-        #endregion
     }
 }

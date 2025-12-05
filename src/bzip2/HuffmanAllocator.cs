@@ -16,8 +16,6 @@ namespace Bzip2
     /// </remarks>
     internal static class HuffmanAllocator
     {
-        #region Public methods
-
         /// <summary>Allocates Canonical Huffman code lengths in place based on a sorted frequency array</summary>
         /// <param name="array">On input, a sorted array of symbol frequencies; On output, an array of Canonical Huffman code lenghts</param>
         /// <param name="maximumLength">The maximum code length. Must be at least ceil(log2(array.length))</param>
@@ -49,10 +47,6 @@ namespace Bzip2
                 AllocateNodeLengthsWithRelocation(array, nodesToRelocate, insertDepth);
             }
         }
-
-        #endregion
-
-        #region Private methods
 
         /// <summary>
         /// 
@@ -204,7 +198,5 @@ namespace Bzip2
             }
             return n;
         }
-
-        #endregion
     }
 }

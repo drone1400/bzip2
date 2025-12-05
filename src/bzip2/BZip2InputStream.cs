@@ -13,8 +13,6 @@ namespace Bzip2
     /// <remarks>Instances of this class are not threadsafe</remarks>
     public class BZip2InputStream : Stream
     {
-        #region Private fields
-
         // The stream from which compressed BZip2 data is read and decoded
         private Stream inputStream;
 
@@ -41,11 +39,7 @@ namespace Bzip2
 
         // The decompressor for the current block
         private BZip2BlockDecompressor blockDecompressor;
-
-        #endregion
-
-        #region Public methods
-
+        
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The InputStream to wrap</param>
         /// <param name="headerless">If true, the caller is assumed to have read away the stream's 
@@ -67,8 +61,6 @@ namespace Bzip2
             // prepare first block
             this.InitializeNextBlock();
         }
-
-        #endregion
 
         #region Implementation of abstract members of Stream
 
@@ -155,8 +147,6 @@ namespace Bzip2
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         #endregion
-
-        #region Private methods
 
         /// <summary>Reads the stream header and checks that the data appears to be a valid BZip2 stream</summary>
         /// <exception cref="IOException">if the stream header is not valid</exception>
@@ -247,7 +237,5 @@ namespace Bzip2
             this.streamComplete = true;
             throw new IOException("BZip2 stream format error");
         }
-
-        #endregion
     }
 }

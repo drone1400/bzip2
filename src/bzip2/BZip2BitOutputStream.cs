@@ -16,8 +16,6 @@ namespace Bzip2
     /// </remarks>
     internal class BZip2BitOutputStream : IBZip2BitOutputStream
     {
-        #region Private fields
-
         // The stream to which bits are written
         private readonly Stream outputStream;
 
@@ -26,8 +24,6 @@ namespace Bzip2
 
         // The number of bits currently buffered in bitBuffer
         private int bitCount;
-
-		#endregion
 
         /// <summary>
         /// Public constructor

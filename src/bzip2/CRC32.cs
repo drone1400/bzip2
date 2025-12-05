@@ -10,8 +10,6 @@ namespace Bzip2
     /// </summary>
     internal class CRC32
     {
-        #region Private fields
-
         /// <summary>The CRC lookup table</summary> 
         private static readonly uint[] Crc32Lookup =
         {
@@ -51,17 +49,9 @@ namespace Bzip2
 
         /// <summary>The current CRC</summary>
         private uint crc = 0xffffffff;
-
-        #endregion
-
-        #region Public properties
-
+        
         /// <summary>Gets the current CRC</summary> 
         public uint CRC => ~this.crc;
-
-        #endregion
-
-        #region Public methods
 
         /// <summary>Updates the CRC with a single byte</summary>
         /// <param name="value">The value to update the CRC with</param>
@@ -80,7 +70,5 @@ namespace Bzip2
                 this.crc = (crc << 8) ^ Crc32Lookup[((crc >> 24) ^ value) & 0xff];
             }
         }
-
-        #endregion
     }
 }

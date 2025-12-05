@@ -13,8 +13,6 @@ namespace Bzip2
     /// </summary>
     internal class BZip2BitInputStream
     {
-        #region Private fields
-
         // The stream from which bits are read
         private readonly Stream inputStream;
 
@@ -23,10 +21,6 @@ namespace Bzip2
 
         // The number of bits currently buffered in bitBuffer
         private int bitCount;
-
-        #endregion
-
-        #region Public methods
 
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The input stream to wrap</param>
@@ -115,7 +109,5 @@ namespace Bzip2
         {
             return (this.ReadBits(16) << 16) | (this.ReadBits(16));
         }
-
-        #endregion
     }
 }

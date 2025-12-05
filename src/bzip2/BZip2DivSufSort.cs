@@ -17,8 +17,6 @@ namespace Bzip2
     /// </remarks>
     internal class BZip2DivSufSort
     {
-        #region Nested classes
-
         private class StackEntry
         {
             readonly public int a;
@@ -75,18 +73,10 @@ namespace Bzip2
             }
         }
 
-        #endregion
-
-        #region Private fields
-
         private const int STACK_SIZE = 64;
-
         private const int BUCKET_A_SIZE = 256;
-
         private const int BUCKET_B_SIZE = 65536;
-
         private const int SS_BLOCKSIZE = 1024;
-
         private const int INSERTIONSORT_THRESHOLD = 8;
 
         private static readonly int[] log2table =
@@ -102,15 +92,8 @@ namespace Bzip2
         };
 
         private readonly int[] SA;
-
         private readonly byte[] T;
-
         private readonly int n;
-
-        #endregion
-
-        #region Public methods
-
 
         /// <summary>
         /// Public constructor
@@ -147,12 +130,7 @@ namespace Bzip2
             return 0 < m ? this.constructBWT(bucketA, bucketB) : 0;
         }
 
-        #endregion
-
-        #region Private methods
-
         // ReSharper disable LoopVariableIsNeverChangedInsideLoop
-
         private static void swapElements (int[] array1,  int index1,  int[] array2,  int index2)
         {
             var temp = array1[index1];
@@ -2425,7 +2403,5 @@ namespace Bzip2
 
             return orig;
         }
-
-        #endregion
     }
 }

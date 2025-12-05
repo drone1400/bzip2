@@ -12,14 +12,8 @@ namespace Bzip2
     /// </summary>
     internal class MoveToFront
     {
-        #region Private fields
-
         /// <summary>The Move To Front list</summary> 
         private readonly byte[] mtf;
-
-        #endregion
-
-        #region Public methods
 
         /// <summary>Public constructor</summary>
         public MoveToFront()
@@ -63,7 +57,5 @@ namespace Bzip2
 
             return value;
         }
-
-        #endregion
     }
 }

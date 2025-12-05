@@ -13,8 +13,6 @@ namespace Bzip2
     /// <remarks>Instances of this class are not threadsafe</remarks>
     public class BZip2ParallelOutputStream : Stream
     {
-        #region  Private Fields
-
         // is there a point to limit this?...
         private const int ABSOLUTE_MAX_THREADS = 128;
 
@@ -62,8 +60,6 @@ namespace Bzip2
 
         // for debug purposes...
         // private int _debugMaxMetaBufferDataPairCount = 0;
-
-        #endregion
 
         /// <summary>
         /// Public constructor

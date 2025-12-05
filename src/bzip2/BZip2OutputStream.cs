@@ -13,8 +13,6 @@ namespace Bzip2
     /// <remarks>Instances of this class are not threadsafe</remarks>
     public class BZip2OutputStream : Stream
     {
-        #region Private fields
-
         // The stream to which compressed BZip2 data is written
         private Stream outputStream;
 
@@ -35,11 +33,7 @@ namespace Bzip2
 
         // True if the underlying stream will be closed with the current Stream
         private bool isOwner;
-
-        #endregion
-
-        #region Public methods
-
+        
         /// <summary>Public constructor</summary>
         /// <param name="outputStream">The output stream to write to</param>
         /// <param name="blockSizeMultiplier">The BZip2 block size as a multiple of 100,000 bytes (minimum 1, maximum 9)</param>
@@ -66,8 +60,6 @@ namespace Bzip2
 
             this.InitialiseNextBlock();
         }
-
-        #endregion
 
         #region Implementation of abstract members of Stream
 
@@ -158,9 +150,7 @@ namespace Bzip2
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         #endregion
-
-        #region Private methods
-
+        
         /// <summary>Initialises a new block for compression</summary> 
         private void InitialiseNextBlock()
         {
@@ -201,7 +191,5 @@ namespace Bzip2
                 }
             }
         }
-
-        #endregion
     }
 }
