@@ -30,7 +30,7 @@ namespace Bzip2
         private Exception _lastWorkerException = null;
 
         // dictionary of processed blocks
-        private readonly Dictionary<int, BZip2BitMetaBuffer> _mtProcessedBlocks = new Dictionary<int, BZip2BitMetaBuffer>();
+        private readonly Dictionary<int, BZip2ParallelOutputDataBlock> _mtProcessedBlocks = new Dictionary<int, BZip2ParallelOutputDataBlock>();
 
         private int _mtPendingBlocks = 0;
         
@@ -47,7 +47,7 @@ namespace Bzip2
         private uint _streamCrc = 0;
 
         //
-        private BZip2BitMetaBuffer _currentBlockBuffer = null;
+        private BZip2ParallelOutputDataBlock _currentBlockBuffer = null;
 
         // True if the underlying stream will be closed with the current Stream
         private readonly bool _isOwner;
@@ -80,7 +80,7 @@ namespace Bzip2
             this._compressBlockSize = 100000 * this._blockLevel;
 
             // initialize initial meta buffer
-            this._currentBlockBuffer = new BZip2BitMetaBuffer(this._compressBlockSize, this._mtNextInputBlockId++);
+            this._currentBlockBuffer = new BZip2ParallelOutputDataBlock(this._compressBlockSize, this._mtNextInputBlockId++);
 
             this._isOwner = isOwner;
 
@@ -103,7 +103,7 @@ namespace Bzip2
 
             try
             {
-                BZip2BitMetaBuffer currentOutput = null;
+                BZip2ParallelOutputDataBlock currentOutput = null;
 
                 lock (this._syncRootProcesing)
                 {
@@ -142,13 +142,13 @@ namespace Bzip2
         /// <summary>
         /// Compresses a block of data 
         /// </summary>
-        /// <param name="blockData"><see cref="BZip2BitMetaBuffer"/></param>
+        /// <param name="blockData"><see cref="BZip2ParallelOutputDataBlock"/></param>
         /// <exception cref="IOException">if compressing the block somehow fails...</exception>
         private void MultiThreadWorkerAction(object blockData)
         {
             try
             {
-                if (blockData is BZip2BitMetaBuffer buffer)
+                if (blockData is BZip2ParallelOutputDataBlock buffer)
                 {
                     // do the work
                     buffer.CompressBytes();
@@ -235,7 +235,7 @@ namespace Bzip2
             {
                 this._mtPendingBlocks ++;
                 ThreadPool.QueueUserWorkItem(this.MultiThreadWorkerAction, this._currentBlockBuffer);
-                this._currentBlockBuffer = new BZip2BitMetaBuffer(this._compressBlockSize, this._mtNextInputBlockId++);
+                this._currentBlockBuffer = new BZip2ParallelOutputDataBlock(this._compressBlockSize, this._mtNextInputBlockId++);
             }
 
             return true;
