@@ -2,8 +2,7 @@
 // Location: https://github.com/drone1400/bzip2
 
 using System;
-
-namespace Bzip2
+namespace Bzip2.Interface
 {
     /// <summary>
     /// Interface for a stream wrapper that implements bit-wise write operations

@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-
-namespace Bzip2
+namespace Bzip2.OutputStream
 {
 
     /// <summary>An OutputStream wrapper that compresses BZip2 data using multiple threads</summary>

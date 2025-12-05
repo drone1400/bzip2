@@ -1,5 +1,5 @@
 using System.IO;
-namespace Bzip2
+namespace Bzip2.Interface
 {
     public interface IBZip2BitInputStream
     {

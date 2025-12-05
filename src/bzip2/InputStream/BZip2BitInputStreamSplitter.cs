@@ -3,7 +3,8 @@
 
 using System;
 using System.IO;
-namespace Bzip2
+using Bzip2.Interface;
+namespace Bzip2.InputStream
 {
 
     /// <summary>

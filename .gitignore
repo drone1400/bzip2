@@ -1,5 +1,4 @@
 #custom output directory structure
-output*
 output/*
 output.obj/*
 output.test/*

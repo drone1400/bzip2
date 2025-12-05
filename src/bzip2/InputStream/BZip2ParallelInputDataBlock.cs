@@ -1,6 +1,7 @@
 using System;
 using System.IO;
-namespace Bzip2
+using Bzip2.Algorithm;
+namespace Bzip2.InputStream
 {
     public class BZip2ParallelInputDataBlock
     {

@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-
-namespace Bzip2
+using Bzip2.Interface;
+namespace Bzip2.InputStream
 {
     /// <summary>An InputStream wrapper that decompresses BZip2 data using multiple threads</summary>
     /// <remarks>Instances of this class are not threadsafe</remarks>

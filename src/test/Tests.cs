@@ -6,6 +6,9 @@
 
 using System;
 using System.IO;
+using Bzip2.Algorithm;
+using Bzip2.InputStream;
+using Bzip2.OutputStream;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -2,10 +2,10 @@
 // Location: https://github.com/drone1400/bzip2
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-
-namespace Bzip2
+using Bzip2.Algorithm;
+using Bzip2.Interface;
+namespace Bzip2.OutputStream
 {
     /// <summary>A collection of bit output data</summary>
     /// <remarks>
