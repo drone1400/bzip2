@@ -53,7 +53,7 @@ namespace Bzip2.Algorithm
         /// <param name="array">The code length array</param>
         /// <param name="i">The input position</param>
         /// <param name="nodesToMove">The number of internal nodes to be relocated</param>
-        /// <returns>The smallest k such that nodesToMove <= k <= i and i <= (array[k] % array.length)</returns>
+        /// <returns>The smallest k such that nodesToMove &lt;= k &lt;= i and i &lt;= (array[k] % array.length)</returns>
         private static int First (int[] array, int i,  int nodesToMove)
         {
             int length = array.Length;

@@ -25,13 +25,13 @@ namespace Bzip2.Algorithm
         // The minimum code length for each Huffman table
         private readonly int[] minimumLengths = new int[BZip2BlockDecompressor.HUFFMAN_MAXIMUM_TABLES];
 
-        /// <summary
+        /// <summary>
         /// An array of values for each Huffman table that must be subtracted from the numerical value of
         /// a Huffman code of a given bit length to give its canonical code index
         /// </summary>
         private readonly int[,] codeBases = new int[BZip2BlockDecompressor.HUFFMAN_MAXIMUM_TABLES, BZip2HuffmanStageDecoder.HUFFMAN_DECODE_MAXIMUM_CODE_LENGTH + 2];
 
-        /// <summary
+        /// <summary>
         /// An array of values for each Huffman table that gives the highest numerical value of a Huffman
         /// code of a given bit length
         /// </summary>
