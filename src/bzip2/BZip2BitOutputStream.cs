@@ -17,13 +17,13 @@ namespace Bzip2
     internal class BZip2BitOutputStream : IBZip2BitOutputStream
     {
         // The stream to which bits are written
-        private readonly Stream outputStream;
+        private readonly Stream _outputStream;
 
         // A buffer of bits waiting to be written to the output stream	 
-        private uint bitBuffer;
+        private uint _bitBuffer;
 
         // The number of bits currently buffered in bitBuffer
-        private int bitCount;
+        private int _bitCount;
 
         /// <summary>
         /// Public constructor
@@ -31,21 +31,21 @@ namespace Bzip2
         /// <param name="outputStream">The OutputStream to wrap</param>
         public BZip2BitOutputStream(Stream outputStream)
         {
-            this.outputStream = outputStream;
+            this._outputStream = outputStream;
         }
 
         #region IBZip2BitOutputStream implementation
 
         public void WriteBoolean (bool value)
         {
-            this.bitCount++;
-            this.bitBuffer |= ((value ? 1u : 0u) << (32 - bitCount));
+            this._bitCount++;
+            this._bitBuffer |= ((value ? 1u : 0u) << (32 - this._bitCount));
 
-            if (bitCount == 8)
+            if (this._bitCount == 8)
             {
-                this.outputStream.WriteByte((byte)(bitBuffer >> 24));
-                bitBuffer = 0;
-                bitCount = 0;
+                this._outputStream.WriteByte((byte)(this._bitBuffer >> 24));
+                this._bitBuffer = 0;
+                this._bitCount = 0;
             }
         }
 
@@ -60,14 +60,14 @@ namespace Bzip2
 
         public void WriteBits (int count,  uint value)
         {
-            this.bitBuffer |= ((value << (32 - count)) >> bitCount);
-            this.bitCount += count;
+            this._bitBuffer |= ((value << (32 - count)) >> this._bitCount);
+            this._bitCount += count;
 
-            while (bitCount >= 8)
+            while (this._bitCount >= 8)
             {
-                this.outputStream.WriteByte((byte)(bitBuffer >> 24));
-                bitBuffer <<= 8;
-                bitCount -= 8;
+                this._outputStream.WriteByte((byte)(this._bitBuffer >> 24));
+                this._bitBuffer <<= 8;
+                this._bitCount -= 8;
             }
         }
 
@@ -79,8 +79,8 @@ namespace Bzip2
 
         public void Flush()
         {
-            if (this.bitCount > 0)
-                this.WriteBits (8 - this.bitCount, 0);
+            if (this._bitCount > 0)
+                this.WriteBits (8 - this._bitCount, 0);
         }
 
         #endregion

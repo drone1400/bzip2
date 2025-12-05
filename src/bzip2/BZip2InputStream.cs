@@ -29,16 +29,16 @@ namespace Bzip2
         }
         
         // The stream from which compressed BZip2 data is read and decoded
-        private Stream inputStream;
+        private Stream _inputStream;
         
         // True if the underlying stream will be closed with the current Stream
-        private readonly bool isOwner;
+        private readonly bool _isOwner;
 
         // An InputStream wrapper that provides bit-level reads
-        private BZip2BitInputStream bitInputStream;
+        private BZip2BitInputStream _bitInputStream;
 
         // (@code true} if the end of the compressed stream has been reached, otherwise false
-        private bool streamComplete;
+        private bool _streamComplete;
 
         /// <summary>
         /// The declared block size of the stream (before final run-length decoding). The final block
@@ -47,13 +47,13 @@ namespace Bzip2
         /// therefore as a hint to the decompressor as to how much working space is sufficient to
         /// decompress blocks in a given stream
         /// </summary>
-        private uint streamBlockSize;
+        private uint _streamBlockSize;
 
         // The merged CRC of all blocks decompressed so far
-        private uint streamCRC;
+        private uint _streamCrc;
 
         // The decompressor for the current block
-        private BZip2BlockDecompressor blockDecompressor;
+        private BZip2BlockDecompressor _blockDecompressor;
         
         
         /// <summary>Public constructor</summary>
@@ -63,9 +63,9 @@ namespace Bzip2
         /// <param name="manualBlockLevel">Used when <see cref="headerCheck"/> is NoHeader</param>
         public BZip2InputStream(Stream inputStream, bool isOwner = true, HeaderCheckType headerCheck = HeaderCheckType.FullHeader, int manualBlockLevel = 9)
         {
-            this.inputStream = inputStream ?? throw new ArgumentException("Null input stream");
-            this.bitInputStream = new BZip2BitInputStream(inputStream);
-            this.isOwner = isOwner;
+            this._inputStream = inputStream ?? throw new ArgumentException("Null input stream");
+            this._bitInputStream = new BZip2BitInputStream(inputStream);
+            this._isOwner = isOwner;
 
             // initialize stream immediately
             this.InitializeStream(headerCheck, manualBlockLevel);
@@ -92,26 +92,26 @@ namespace Bzip2
         {
             throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Write(byte[] buffer, int offset, int count)' method.");
         }
-        public override bool CanRead => this.inputStream.CanRead;
+        public override bool CanRead => this._inputStream.CanRead;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length => this.inputStream.Length;
+        public override long Length => this._inputStream.Length;
         public override long Position
         {
-            get => this.inputStream.Position;
+            get => this._inputStream.Position;
             set =>throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support Set operation for property 'Position'.");
         }
 
         public override int ReadByte() 
         {
-            var nextByte = this.blockDecompressor.Read();
+            var nextByte = this._blockDecompressor.Read();
             
             // if current block has reached its end, prepare next block and try reading again
             if (nextByte == -1) 
             {
                 if (this.InitializeNextBlock()) 
                 {
-                    nextByte = this.blockDecompressor.Read();
+                    nextByte = this._blockDecompressor.Read();
                 }
             }
 
@@ -120,14 +120,14 @@ namespace Bzip2
 
         public override int Read(byte[] destination,  int offset,  int length) 
         {
-            int bytesRead = this.blockDecompressor.Read(destination, offset, length);
+            int bytesRead = this._blockDecompressor.Read(destination, offset, length);
 
             // if current block has reached its end, prepare next block and try reading again
             if (bytesRead == -1) 
             {
                 if (this.InitializeNextBlock()) 
                 {
-                    bytesRead = this.blockDecompressor.Read(destination, offset, length);
+                    bytesRead = this._blockDecompressor.Read(destination, offset, length);
                 }
             }
 
@@ -139,22 +139,22 @@ namespace Bzip2
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
         protected override void Dispose(bool disposing)
         {
-            if (this.bitInputStream == null)
+            if (this._bitInputStream == null)
                 return;
 
-            this.streamComplete = true;
-            this.blockDecompressor = null;
-            this.bitInputStream = null;
+            this._streamComplete = true;
+            this._blockDecompressor = null;
+            this._bitInputStream = null;
 
             try
             {
-                if (this.isOwner)
+                if (this._isOwner)
                 {
-                    this.inputStream.Close();
+                    this._inputStream.Close();
                 }
             } finally
             {
-                this.inputStream = null;
+                this._inputStream = null;
             }
         }
 
@@ -167,11 +167,11 @@ namespace Bzip2
         private void InitializeStream(HeaderCheckType headerCheck, int blockLevel) 
         {
             /* If the stream has been explicitly closed, throw an exception */
-            if (this.bitInputStream == null)
+            if (this._bitInputStream == null)
                 throw new IOException("Stream closed");
 
             // If we're already at the end of the stream, do nothing
-            if (this.streamComplete)
+            if (this._streamComplete)
                 return;
 
             // Read the stream header
@@ -181,9 +181,9 @@ namespace Bzip2
                 {
                     case HeaderCheckType.FullHeader:
                     {
-                        uint marker1 = this.bitInputStream.ReadBits(16);
-                        uint marker2 = this.bitInputStream.ReadBits(8);
-                        blockLevel = ((int)this.bitInputStream.ReadBits(8) - '0');
+                        uint marker1 = this._bitInputStream.ReadBits(16);
+                        uint marker2 = this._bitInputStream.ReadBits(8);
+                        blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
                         if (marker1 != BZip2Constants.STREAM_START_MARKER_1 ||
                             marker2 !=  BZip2Constants.STREAM_START_MARKER_2 ||
                             blockLevel < 1 ||  blockLevel > 9)
@@ -194,8 +194,8 @@ namespace Bzip2
                     }
                     case HeaderCheckType.NoBz:
                     {
-                        uint marker2 = this.bitInputStream.ReadBits(8);
-                        blockLevel = ((int)this.bitInputStream.ReadBits(8) - '0');
+                        uint marker2 = this._bitInputStream.ReadBits(8);
+                        blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
                         if (marker2 !=  BZip2Constants.STREAM_START_MARKER_2 ||
                             blockLevel < 1 ||  blockLevel > 9)
                         {
@@ -205,7 +205,7 @@ namespace Bzip2
                     }
                     case HeaderCheckType.NoBzh:
                     {
-                        blockLevel = ((int)this.bitInputStream.ReadBits(8) - '0');
+                        blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
                         if (blockLevel < 1 ||  blockLevel > 9)
                         {
                             throw new IOException("Invalid BZip2 header");
@@ -214,11 +214,11 @@ namespace Bzip2
                     }
                 }
 
-                this.streamBlockSize = (uint)(blockLevel * 100000);
+                this._streamBlockSize = (uint)(blockLevel * 100000);
             } catch (IOException)
             {
                 // If the stream header was not valid, stop trying to read more data
-                this.streamComplete = true;
+                this._streamComplete = true;
                 throw;
             }
         }
@@ -233,30 +233,30 @@ namespace Bzip2
         {
 
             // If we're already at the end of the stream, do nothing
-            if (this.streamComplete)
+            if (this._streamComplete)
                 return false;
 
             // If a block is complete, check the block CRC and integrate it into the stream CRC
-            if (this.blockDecompressor != null)
+            if (this._blockDecompressor != null)
             {
-                uint blockCRC = this.blockDecompressor.CheckCrc();
-                this.streamCRC = ((this.streamCRC << 1) | (this.streamCRC >> 31)) ^ blockCRC;
+                uint blockCrc = this._blockDecompressor.CheckCrc();
+                this._streamCrc = ((this._streamCrc << 1) | (this._streamCrc >> 31)) ^ blockCrc;
             }
 
             // Read block-header or end-of-stream marker
-            uint marker1 = this.bitInputStream.ReadBits(24);
-            uint marker2 = this.bitInputStream.ReadBits(24);
+            uint marker1 = this._bitInputStream.ReadBits(24);
+            uint marker2 = this._bitInputStream.ReadBits(24);
 
             if (marker1 == BZip2Constants.BLOCK_HEADER_MARKER_1 && marker2 == BZip2Constants.BLOCK_HEADER_MARKER_2)
             {
                 // Initialise a new block
                 try
                 {
-                    this.blockDecompressor = new BZip2BlockDecompressor(this.bitInputStream, this.streamBlockSize);
+                    this._blockDecompressor = new BZip2BlockDecompressor(this._bitInputStream, this._streamBlockSize);
                 } catch (IOException)
                 {
                     // If the block could not be decoded, stop trying to read more data
-                    this.streamComplete = true;
+                    this._streamComplete = true;
                     throw;
                 }
                 return true;
@@ -264,17 +264,17 @@ namespace Bzip2
             if (marker1 == BZip2Constants.STREAM_END_MARKER_1 && marker2 == BZip2Constants.STREAM_END_MARKER_2)
             {
                 // Read and verify the end-of-stream CRC
-                this.streamComplete = true;
-                uint storedCombinedCRC = this.bitInputStream.ReadInteger(); // .ReadBits(32);
+                this._streamComplete = true;
+                uint storedCombinedCrc = this._bitInputStream.ReadInteger(); // .ReadBits(32);
 
-                if (storedCombinedCRC != this.streamCRC)
+                if (storedCombinedCrc != this._streamCrc)
                     throw new IOException("BZip2 stream CRC error");
 
                 return false;
             }
 
             // If what was read is not a valid block-header or end-of-stream marker, the stream is broken
-            this.streamComplete = true;
+            this._streamComplete = true;
             throw new IOException("BZip2 stream format error");
         }
     }

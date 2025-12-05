@@ -3,7 +3,6 @@
 // Location: http://github.com/jaime-olivares/bzip2
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
 
-using System;
 using System.IO;
 
 namespace Bzip2
@@ -14,19 +13,19 @@ namespace Bzip2
     internal class BZip2BitInputStream : IBZip2BitInputStream
     {
         // The stream from which bits are read
-        private readonly Stream inputStream;
+        private readonly Stream _inputStream;
 
         // A buffer of bits read from the input stream that have not yet been returned
-        private uint bitBuffer;
+        private uint _bitBuffer;
 
         // The number of bits currently buffered in bitBuffer
-        private int bitCount;
+        private int _bitCount;
 
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The input stream to wrap</param>
         public BZip2BitInputStream(Stream inputStream)
         {
-            this.inputStream = inputStream;
+            this._inputStream = inputStream;
         }
 
         /// <summary>Reads a single bit from the wrapped input stream</summary>
@@ -34,21 +33,21 @@ namespace Bzip2
         /// <exception cref="IOException">if no more bits are available in the input stream</exception>
         public bool ReadBoolean()
         {
-            if (bitCount > 0)
+            if (this._bitCount > 0)
             {
-                bitCount--;
+                this._bitCount--;
             } else
             {
-                int byteRead = this.inputStream.ReadByte();
+                int byteRead = this._inputStream.ReadByte();
 
                 if (byteRead < 0)
                     throw new IOException("Insufficient data");
 
-                bitBuffer = (bitBuffer << 8) | (uint)byteRead;
-                bitCount += 7;
+                this._bitBuffer = (this._bitBuffer << 8) | (uint)byteRead;
+                this._bitCount += 7;
             }
 
-            return ((this.bitBuffer & (1 << this.bitCount))) != 0;
+            return ((this._bitBuffer & (1 << this._bitCount))) != 0;
         }
 
         /// <summary>Reads a zero-terminated unary number from the wrapped input stream</summary>
@@ -58,21 +57,21 @@ namespace Bzip2
         {
             for (uint unaryCount = 0; ; unaryCount++)
             {
-                if (bitCount > 0)
+                if (this._bitCount > 0)
                 {
-                    bitCount--;
+                    this._bitCount--;
                 } else
                 {
-                    var byteRead = this.inputStream.ReadByte();
+                    var byteRead = this._inputStream.ReadByte();
 
                     if (byteRead < 0)
                         throw new IOException("Insufficient data");
 
-                    bitBuffer = (bitBuffer << 8) | (uint)byteRead;
-                    bitCount += 7;
+                    this._bitBuffer = (this._bitBuffer << 8) | (uint)byteRead;
+                    this._bitCount += 7;
                 }
 
-                if (((bitBuffer & (1 << bitCount))) == 0)
+                if (((this._bitBuffer & (1 << this._bitCount))) == 0)
                     return unaryCount;
             }
         }
@@ -83,23 +82,23 @@ namespace Bzip2
         /// <exception cref="IOException">if no more bits are available in the input stream</exception>
         public uint ReadBits(int count)
         {
-            if (bitCount < count)
+            if (this._bitCount < count)
             {
-                while (bitCount < count)
+                while (this._bitCount < count)
                 {
-                    int byteRead = this.inputStream.ReadByte();
+                    int byteRead = this._inputStream.ReadByte();
 
                     if (byteRead < 0)
                         throw new IOException("Insufficient data");
 
-                    bitBuffer = (bitBuffer << 8) | (uint)byteRead;
-                    bitCount += 8;
+                    this._bitBuffer = (this._bitBuffer << 8) | (uint)byteRead;
+                    this._bitCount += 8;
                 }
             }
 
-            bitCount -= count;
+            this._bitCount -= count;
 
-            return (uint)((bitBuffer >> bitCount) & ((1 << count) - 1));
+            return (uint)((this._bitBuffer >> this._bitCount) & ((1 << count) - 1));
         }
 
         /// <summary>Reads 32 bits of input as an integer</summary>
