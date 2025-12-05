@@ -90,66 +90,36 @@ namespace Bzip2
         #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public override void Flush ()
         {
-            throw new NotImplementedException ();
+            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Flush()' method.");
         }
 
         public override int Read (byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException ();
+            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Read(byte[] buffer, int offset, int count)' method.");
         }
 
         public override long Seek (long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException ();
+            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
         }
 
         public override void SetLength (long value)
         {
-            throw new NotImplementedException ();
+            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'SetLength(long value)' method.");
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanRead => false;
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanSeek => false;
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool CanWrite => this.outputStream.CanWrite;
 
-        public override long Length
-        {
-            get
-            {
-                throw new NotImplementedException ();
-            }
-        }
+        public override long Length => this.outputStream.Length;
 
         public override long Position
         {
-            get
-            {
-                throw new NotImplementedException ();
-            }
-            set
-            {
-                throw new NotImplementedException ();
-            }
+            get => this.outputStream.Position;
+            set =>throw new NotSupportedException($"{nameof(BZip2OutputStream)} does not support Set operation for property 'Position'.");
         }
 
         public override void WriteByte(byte value)

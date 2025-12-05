@@ -410,22 +410,10 @@ namespace Bzip2
             }
         }
 
-        public override bool CanRead
-        {
-            get => false;
-        }
-        public override bool CanSeek
-        {
-            get => false;
-        }
-        public override bool CanWrite
-        {
-            get => this._outputStream.CanWrite;
-        }
-        public override long Length
-        {
-            get => this._outputStream.Length;
-        }
+        public override bool CanRead => false;
+        public override bool CanSeek => false;
+        public override bool CanWrite => this._outputStream.CanWrite;
+        public override long Length => this._outputStream.Length;
 
         public override long Position
         {
