@@ -244,8 +244,8 @@ namespace Bzip2
         /// <summary>
         /// Reads the Huffman encoded data from the input stream, performs Run-Length Decoding and
         /// applies the Move To Front transform to reconstruct the Burrows-Wheeler Transform array
-        /// @param huffmanDecoder The Huffman decoder through which symbols are read
         /// </summary>
+        /// <param name="huffmanDecoder">The Huffman decoder through which symbols are read</param>
         /// <exception cref="IOException">if an end-of-block symbol was not decoded within the declared block size</exception>
         private void DecodeHuffmanData(BZip2HuffmanStageDecoder huffmanDecoder)
         {
@@ -305,8 +305,8 @@ namespace Bzip2
 
         /// <summary>
         /// Set up the Inverse Burrows-Wheeler Transform merged pointer array
-        /// @param bwtStartPointer The start pointer into the BWT array
         /// </summary>
+        /// <param name="bwtStartPointer">The start pointer into the BWT array</param>
         /// <exception cref="IOException">if the given start pointer is invalid</exception>
         private void InitialiseInverseBWT(uint bwtStartPointer)
         {
