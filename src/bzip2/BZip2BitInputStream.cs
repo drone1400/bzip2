@@ -11,7 +11,7 @@ namespace Bzip2
     /// <summary>
     /// Implements a bit-wise input stream
     /// </summary>
-    internal class BZip2BitInputStream
+    internal class BZip2BitInputStream : IBZip2BitInputStream
     {
         // The stream from which bits are read
         private readonly Stream inputStream;
