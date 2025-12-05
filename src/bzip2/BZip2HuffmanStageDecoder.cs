@@ -26,16 +26,16 @@ namespace Bzip2
         // The minimum code length for each Huffman table
         private readonly int[] minimumLengths = new int[BZip2BlockDecompressor.HUFFMAN_MAXIMUM_TABLES];
 
-        /**
-         * An array of values for each Huffman table that must be subtracted from the numerical value of
-         * a Huffman code of a given bit length to give its canonical code index
-         */
+        /// <summary
+        /// An array of values for each Huffman table that must be subtracted from the numerical value of
+        /// a Huffman code of a given bit length to give its canonical code index
+        /// </summary>
         private readonly int[,] codeBases = new int[BZip2BlockDecompressor.HUFFMAN_MAXIMUM_TABLES, HUFFMAN_DECODE_MAXIMUM_CODE_LENGTH + 2];
 
-        /**
-         * An array of values for each Huffman table that gives the highest numerical value of a Huffman
-         * code of a given bit length
-         */
+        /// <summary
+        /// An array of values for each Huffman table that gives the highest numerical value of a Huffman
+        /// code of a given bit length
+        /// </summary>
         private readonly int[,] codeLimits = new int[BZip2BlockDecompressor.HUFFMAN_MAXIMUM_TABLES, HUFFMAN_DECODE_MAXIMUM_CODE_LENGTH + 1];
 
         // A mapping for each Huffman table from canonical code index to output symbol
@@ -54,13 +54,13 @@ namespace Bzip2
 
         #region Public methods
 
-        /**
-         * Public constructor
-         * @param bitInputStream The BZip2BitInputStream from which Huffman codes are read
-         * @param alphabetSize The total number of codes (uniform for each table)
-         * @param tableCodeLengths The Canonical Huffman code lengths for each table
-         * @param selectors The Huffman table number to use for each group of 50 symbols
-         */
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="bitInputStream">The BZip2BitInputStream from which Huffman codes are read</param>
+        /// <param name="alphabetSize">The total number of codes (uniform for each table)</param>
+        /// <param name="tableCodeLengths">The Canonical Huffman code lengths for each table</param>
+        /// <param name="selectors">The Huffman table number to use for each group of 50 symbols</param>
         public BZip2HuffmanStageDecoder(BZip2BitInputStream bitInputStream, int alphabetSize, byte[,] tableCodeLengths, byte[] selectors)
         {
             this.bitInputStream = bitInputStream;
@@ -69,11 +69,11 @@ namespace Bzip2
             this.CreateHuffmanDecodingTables(alphabetSize, tableCodeLengths);
         }
 
-        /**
-         * Decodes and returns the next symbol
-         * @return The decoded symbol
-         * Exception if the end of the input stream is reached while decoding
-         */
+        /// <summary>
+        /// Decodes and returns the next symbol
+        /// </summary>
+        /// <returns>The decoded symbol</returns>
+        /// <exception cref="Exception">if the end of the input stream is reached while decoding</exception>
         public int NextSymbol()
         {
             // Move to next group selector if required
@@ -108,11 +108,11 @@ namespace Bzip2
 
         #region Private methods
 
-        /**
-         * Constructs Huffman decoding tables from lists of Canonical Huffman code lengths
-         * @param alphabetSize The total number of codes (uniform for each table)
-         * @param tableCodeLengths The Canonical Huffman code lengths for each table
-         */
+        /// <summary>
+        /// Constructs Huffman decoding tables from lists of Canonical Huffman code lengths
+        /// </summary>
+        /// <param name="alphabetSize">The total number of codes (uniform for each table)</param>
+        /// <param name="tableCodeLengths">The Canonical Huffman code lengths for each table</param>
         private void CreateHuffmanDecodingTables (int alphabetSize,  byte[,] tableCodeLengths)
         {
 

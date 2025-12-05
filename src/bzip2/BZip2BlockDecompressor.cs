@@ -23,15 +23,15 @@ namespace Bzip2
     {
         #region Private fields
 
-        /**
-         * The BZip2 specification originally included the optional addition of a slight pseudo-random
-         * perturbation to the input data, in order to work around the block sorting algorithm's non-
-         * optimal performance on some types of input. The current mainline bzip2 does not require this
-         * and will not create randomised blocks, but compatibility is still required for old data (and
-         * third party compressors that haven't caught up). When decompressing a randomised block, for
-         * each value N in this array, a 1 will be XOR'd onto the output of the Burrows-Wheeler
-         * transform stage after N bytes, then the next N taken from the following entry.
-         */
+        /// <summary>
+        /// The BZip2 specification originally included the optional addition of a slight pseudo-random
+        /// perturbation to the input data, in order to work around the block sorting algorithm's non-
+        /// optimal performance on some types of input. The current mainline bzip2 does not require this
+        /// and will not create randomised blocks, but compatibility is still required for old data (and
+        /// third party compressors that haven't caught up). When decompressing a randomised block, for
+        /// each value N in this array, a 1 will be XOR'd onto the output of the Burrows-Wheeler
+        /// transform stage after N bytes, then the next N taken from the following entry.
+        /// </summary>
         private static readonly int[] RNUMS =
         {
             619, 720, 127, 481, 931, 816, 813, 233, 566, 247, 985, 724, 205, 454, 863, 491,
@@ -83,66 +83,74 @@ namespace Bzip2
         // true if the current block is randomised, otherwise false
         private readonly bool blockRandomised;
 
-        /* Huffman Decoding stage */
+        //
+        // Huffman Decoding stage
+        //
 
         // The end-of-block Huffman symbol. Decoding of the block ends when this is encountered
         private int huffmanEndOfBlockSymbol;
 
-        /**
-         * A map from Huffman symbol index to output character. Some types of data (e.g. ASCII text)
-         * may contain only a limited number of byte values; Huffman symbols are only allocated to
-         * those values that actually occur in the uncompressed data.
-         */
+        /// <summary>
+        /// A map from Huffman symbol index to output character. Some types of data (e.g. ASCII text)
+        /// may contain only a limited number of byte values; Huffman symbols are only allocated to
+        /// those values that actually occur in the uncompressed data.
+        /// </summary>
         private readonly byte[] huffmanSymbolMap = new byte[256];
 
-        /* Move To Front stage */
+        //
+        // Move To Front stage
+        //
 
-        /**
-        * Counts of each byte value within the bwtTransformedArray data. Collected at the Move
-        * To Front stage, consumed by the Inverse Burrows Wheeler Transform stage
-        */
+        /// <summary>
+       /// Counts of each byte value within the bwtTransformedArray data. Collected at the Move
+       /// To Front stage, consumed by the Inverse Burrows Wheeler Transform stage
+       /// </summary>
         private readonly int[] bwtByteCounts = new int[256];
 
-        /**
-         * The Burrows-Wheeler Transform processed data. Read at the Move To Front stage, consumed by the
-         * Inverse Burrows Wheeler Transform stage
-         */
+        /// <summary>
+        /// The Burrows-Wheeler Transform processed data. Read at the Move To Front stage, consumed by the
+        /// Inverse Burrows Wheeler Transform stage
+        /// </summary>
         private byte[] bwtBlock;
 
-        /* Inverse Burrows-Wheeler Transform stage */
+        //
+        // Inverse Burrows-Wheeler Transform stage
+        //
 
-        /**
-        * At each position contains the union of :-
-        *   An output character (8 bits)
-        *   A pointer from each position to its successor (24 bits, left shifted 8 bits)
-        * As the pointer cannot exceed the maximum block size of 900k, 24 bits is more than enough to
-        * hold it; Folding the character data into the spare bits while performing the inverse BWT,
-        * when both pieces of information are available, saves a large number of memory accesses in
-        * the final decoding stages.
-        */
+        /// <summary>
+        /// At each position contains the union of :-
+        ///   An output character (8 bits)
+        ///   A pointer from each position to its successor (24 bits, left shifted 8 bits)
+        /// As the pointer cannot exceed the maximum block size of 900k, 24 bits is more than enough to
+        /// hold it; Folding the character data into the spare bits while performing the inverse BWT,
+        /// when both pieces of information are available, saves a large number of memory accesses in
+        /// the final decoding stages.
+        /// </summary>
         private int[] bwtMergedPointers;
 
         // The current merged pointer into the Burrow-Wheeler Transform array
         private int bwtCurrentMergedPointer;
 
-        /**
-         * The actual length in bytes of the current block at the Inverse Burrows Wheeler Transform
-         * stage (before final Run-Length Decoding)
-         */
+        /// <summary>
+        /// The actual length in bytes of the current block at the Inverse Burrows Wheeler Transform
+        /// stage (before final Run-Length Decoding)
+        /// </summary>
         private int bwtBlockLength;
 
         // The number of output bytes that have been decoded up to the Inverse Burrows Wheeler Transform stage
         private int bwtBytesDecoded;
 
-        /* Run-Length Encoding and Random Perturbation stage */
+        //
+        // Run-Length Encoding and Random Perturbation stage
+        //
 
         // The most recently RLE decoded byte
         private int rleLastDecodedByte = -1;
 
-        /**
-         * The number of previous identical output bytes decoded. After 4 identical bytes, the next byte
-         * decoded is an RLE repeat count
-         */
+        /// <summary>
+        /// The number of previous identical output bytes decoded. After 4 identical bytes, the next byte
+        /// decoded is an RLE repeat count
+        /// </summary>
         private int rleAccumulator;
 
         // The RLE repeat count of the current decoded byte. When this reaches zero, a new byte is decoded
@@ -168,16 +176,16 @@ namespace Bzip2
 
         #region Private methods
 
-        /**
-         * Read and decode the block's Huffman tables
-         * @return A decoder for the Huffman stage that uses the decoded tables
-         * Exception if the input stream reaches EOF before all table data has been read
-         */
+        /// <summary>
+        /// Read and decode the block's Huffman tables
+        /// @return A decoder for the Huffman stage that uses the decoded tables
+        /// Exception if the input stream reaches EOF before all table data has been read
+        /// </summary>
         private BZip2HuffmanStageDecoder ReadHuffmanTables()
         {
             var tableCodeLengths = new byte[HUFFMAN_MAXIMUM_TABLES, BZip2MTFAndRLE2StageEncoder.HUFFMAN_MAXIMUM_ALPHABET_SIZE];
 
-            /* Read Huffman symbol to output byte map */
+            // Read Huffman symbol to output byte map
             uint huffmanUsedRanges = bitInputStream.ReadBits(16);
             int huffmanSymbolCount = 0;
 
@@ -196,7 +204,7 @@ namespace Bzip2
             var endOfBlockSymbol = huffmanSymbolCount + 1;
             this.huffmanEndOfBlockSymbol = endOfBlockSymbol;
 
-            /* Read total number of tables and selectors*/
+            // Read total number of tables and selectors
             uint totalTables = bitInputStream.ReadBits(3);
             uint totalSelectors = bitInputStream.ReadBits(15);
             if ((totalTables < HUFFMAN_MINIMUM_TABLES)
@@ -207,7 +215,7 @@ namespace Bzip2
                 throw new Exception("BZip2 block Huffman tables invalid");
             }
 
-            /* Read and decode MTFed Huffman selector list */
+            // Read and decode MTFed Huffman selector list
             var tableMTF = new MoveToFront();
             var selectors = new byte[totalSelectors];
             for (var selector = 0; selector < totalSelectors; selector++)
@@ -215,7 +223,7 @@ namespace Bzip2
                 selectors[selector] = tableMTF.IndexToFront((int)bitInputStream.ReadUnary());
             }
 
-            /* Read the Canonical Huffman code lengths for each table */
+            // Read the Canonical Huffman code lengths for each table
             for (var table = 0; table < totalTables; table++)
             {
                 int currentLength = (int)bitInputStream.ReadBits(5);
@@ -232,12 +240,12 @@ namespace Bzip2
             return new BZip2HuffmanStageDecoder(bitInputStream, endOfBlockSymbol + 1, tableCodeLengths, selectors);
         }
 
-        /**
-         * Reads the Huffman encoded data from the input stream, performs Run-Length Decoding and
-         * applies the Move To Front transform to reconstruct the Burrows-Wheeler Transform array
-         * @param huffmanDecoder The Huffman decoder through which symbols are read
-         * Exception if an end-of-block symbol was not decoded within the declared block size
-         */
+        /// <summary>
+        /// Reads the Huffman encoded data from the input stream, performs Run-Length Decoding and
+        /// applies the Move To Front transform to reconstruct the Burrows-Wheeler Transform array
+        /// @param huffmanDecoder The Huffman decoder through which symbols are read
+        /// Exception if an end-of-block symbol was not decoded within the declared block size
+        /// </summary>
         private void DecodeHuffmanData(BZip2HuffmanStageDecoder huffmanDecoder)
         {
             var symbolMTF = new MoveToFront();
@@ -294,11 +302,11 @@ namespace Bzip2
             this.bwtBlockLength = _bwtBlockLength;
         }
 
-        /**
-         * Set up the Inverse Burrows-Wheeler Transform merged pointer array
-         * @param bwtStartPointer The start pointer into the BWT array
-         * Exception if the given start pointer is invalid
-         */
+        /// <summary>
+        /// Set up the Inverse Burrows-Wheeler Transform merged pointer array
+        /// @param bwtStartPointer The start pointer into the BWT array
+        /// Exception if the given start pointer is invalid
+        /// </summary>
         private void InitialiseInverseBWT(uint bwtStartPointer)
         {
             var _bwtMergedPointers = new int[this.bwtBlockLength];
@@ -329,11 +337,11 @@ namespace Bzip2
             this.bwtCurrentMergedPointer = _bwtMergedPointers[bwtStartPointer];
         }
 
-        /**
-         * Decodes a byte from the Burrows-Wheeler Transform stage. If the block has randomisation
-         * applied, reverses the randomisation
-         * @return The decoded byte
-         */
+        /// <summary>
+        /// Decodes a byte from the Burrows-Wheeler Transform stage. If the block has randomisation
+        /// applied, reverses the randomisation
+        /// </summary>
+        /// <returns>The decoded byte</returns>
         private int decodeNextBWTByte()
         {
             int nextDecodedByte = this.bwtCurrentMergedPointer & 0xff;
@@ -358,12 +366,13 @@ namespace Bzip2
 
         #region Public methods
 
-        /**
-         * Public constructor
-         * @param bitInputStream The BZip2BitInputStream to read from
-         * @param blockSize The maximum decoded size of the block
-         * Exception If the block could not be decoded
-         */
+
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="bitInputStream">The BZip2BitInputStream to read from</param>
+        /// <param name="blockSize">The maximum decoded size of the block</param>
+        /// <exception cref="Exception">If the block could not be decoded</exception>
         public BZip2BlockDecompressor(BZip2BitInputStream bitInputStream, uint blockSize)
         {
             this.bitInputStream = bitInputStream;
@@ -380,11 +389,12 @@ namespace Bzip2
             this.InitialiseInverseBWT(bwtStartPointer);
         }
 
-        /**
-         * Decodes a byte from the final Run-Length Encoding stage, pulling a new byte from the
-         * Burrows-Wheeler Transform stage when required
-         * @return The decoded byte, or -1 if there are no more bytes
-         */
+
+        /// <summary>
+        /// Decodes a byte from the final Run-Length Encoding stage, pulling a new byte from the
+        /// Burrows-Wheeler Transform stage when required
+        /// </summary>
+        /// <returns>The decoded byte, or -1 if there are no more bytes</returns>
         public int Read()
         {
             while (this.rleRepeat < 1)
@@ -422,14 +432,14 @@ namespace Bzip2
             return this.rleLastDecodedByte;
         }
 
-        /**
-         * Decodes multiple bytes from the final Run-Length Encoding stage, pulling new bytes from the
-         * Burrows-Wheeler Transform stage when required
-         * @param destination The array to write to
-         * @param offset The starting position within the array
-         * @param length The number of bytes to read
-         * @return The number of bytes actually read, or -1 if there are no bytes left in the block
-         */
+        /// <summary>
+        /// Decodes multiple bytes from the final Run-Length Encoding stage, pulling new bytes from the
+        /// Burrows-Wheeler Transform stage when required
+        /// </summary>
+        /// <param name="destination">The array to write to</param>
+        /// <param name="offset">The starting position within the array</param>
+        /// <param name="length">The number of bytes to read</param>
+        /// <returns>The number of bytes actually read, or -1 if there are no bytes left in the block</returns>
         public int Read(byte[] destination, int offset, int length)
         {
             int i;
@@ -443,12 +453,12 @@ namespace Bzip2
             }
             return i;
         }
-
-        /**
-         * Verify and return the block CRC. This method may only be called after all of the block's bytes have been read
-         * @return The block CRC
-         * Exception if the CRC verification failed
-         */
+        
+        /// <summary>
+        /// Verify and return the block CRC. This method may only be called after all of the block's bytes have been read
+        /// </summary>
+        /// <returns>The block CRC</returns>
+        /// <exception cref="Exception">if the CRC verification failed</exception>
         public uint CheckCrc()
         {
             if (this.blockCRC != this.crc.CRC)

@@ -27,13 +27,13 @@ namespace Bzip2
         // (@code true} if the end of the compressed stream has been reached, otherwise false
         private bool streamComplete;
 
-        /**
-         * The declared block size of the stream (before final run-length decoding). The final block
-         * will usually be smaller, but no block in the stream has to be exactly this large, and an
-         * encoder could in theory choose to mix blocks of any size up to this value. Its function is
-         * therefore as a hint to the decompressor as to how much working space is sufficient to
-         * decompress blocks in a given stream
-         */
+        /// <summary>
+        /// The declared block size of the stream (before final run-length decoding). The final block
+        /// will usually be smaller, but no block in the stream has to be exactly this large, and an
+        /// encoder could in theory choose to mix blocks of any size up to this value. Its function is
+        /// therefore as a hint to the decompressor as to how much working space is sufficient to
+        /// decompress blocks in a given stream
+        /// </summary>
         private uint streamBlockSize;
 
         // The merged CRC of all blocks decompressed so far
@@ -188,15 +188,15 @@ namespace Bzip2
         /// <exception>if the stream header is not valid</exception>
         private void InitialiseStream()
         {
-            /* If the stream has been explicitly closed, throw an exception */
+            // If the stream has been explicitly closed, throw an exception
             if (this.bitInputStream == null)
                 throw new Exception ("Stream closed");
 
-            /* If we're already at the end of the stream, do nothing */
+            // If we're already at the end of the stream, do nothing
             if (this.streamComplete)
                 return;
 
-            /* Read the stream header */
+            // Read the stream header
             try
             {
                 uint marker1 = this.headerless ? 0 : this.bitInputStream.ReadBits(16);
@@ -228,18 +228,18 @@ namespace Bzip2
         private bool InitialiseNextBlock()
         {
 
-            /* If we're already at the end of the stream, do nothing */
+            // If we're already at the end of the stream, do nothing
             if (this.streamComplete)
                 return false;
 
-            /* If a block is complete, check the block CRC and integrate it into the stream CRC */
+            // If a block is complete, check the block CRC and integrate it into the stream CRC
             if (this.blockDecompressor != null)
             {
                 uint blockCRC = this.blockDecompressor.CheckCrc();
                 this.streamCRC = ((this.streamCRC << 1) | (this.streamCRC >> 31)) ^ blockCRC;
             }
 
-            /* Read block-header or end-of-stream marker */
+            // Read block-header or end-of-stream marker
             uint marker1 = this.bitInputStream.ReadBits(24);
             uint marker2 = this.bitInputStream.ReadBits(24);
 
@@ -261,7 +261,7 @@ namespace Bzip2
             {
                 // Read and verify the end-of-stream CRC
                 this.streamComplete = true;
-                uint storedCombinedCRC = this.bitInputStream.ReadInteger(); ///.ReadBits(32);
+                uint storedCombinedCRC = this.bitInputStream.ReadInteger(); // .ReadBits(32);
 
                 if (storedCombinedCRC != this.streamCRC)
                     throw new Exception ("BZip2 stream CRC error");
@@ -269,7 +269,7 @@ namespace Bzip2
                 return false;
             }
 
-            /* If what was read is not a valid block-header or end-of-stream marker, the stream is broken */
+            // If what was read is not a valid block-header or end-of-stream marker, the stream is broken
             this.streamComplete = true;
             throw new Exception ("BZip2 stream format error");
         }

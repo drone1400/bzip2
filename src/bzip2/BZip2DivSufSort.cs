@@ -111,11 +111,13 @@ namespace Bzip2
 
         #region Public methods
 
-        /**
-         * @param T The input array
-         * @param SA The output array
-         * @param n The length of the input data
-         */
+
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="T">T The input array</param>
+        /// <param name="SA">SA The output array</param>
+        /// <param name="n">The length of the input data</param>
         public BZip2DivSufSort(byte[] T, int[] SA, int n)
         {
             this.T = T;
@@ -123,10 +125,10 @@ namespace Bzip2
             this.n = n;
         }
 
-        /**
-         * Performs a Burrows Wheeler Transform on the input array
-         * @return the index of the first character of the input array within the output array
-         */
+        /// <summary>
+        /// Performs a Burrows Wheeler Transform on the input array
+        /// </summary>
+        /// <returns>the index of the first character of the input array within the output array</returns>
         public int BWT()
         {
             if (n == 0)
@@ -2127,7 +2129,7 @@ namespace Bzip2
                             this.trIntroSort (ISA, ISA + depth, ISA + x, first, last, budget, x);
                             if (budget.chance == 0)
                             {
-                                /* Switch to Larsson-Sadakane sorting algorithm. */
+                                // Switch to Larsson-Sadakane sorting algorithm.
                                 if (0 < first)
                                 {
                                     SA[0] = -first;

@@ -74,13 +74,13 @@ namespace Bzip2
 
         #region Public methods
 
-        /**
-         * Public constructor
-         * @param bwtBlock The Burrows Wheeler Transformed block data
-         * @param bwtLength The actual length of the BWT data
-         * @param bwtValuesPresent The values that are present within the BWT data. For each index,
-         *            true if that value is present within the data, otherwise false
-         */
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="bwtBlock">The Burrows Wheeler Transformed block data</param>
+        /// <param name="bwtLength">The actual length of the BWT data</param>
+        /// <param name="bwtValuesPresent">The values that are present within the BWT data. For each index,
+        /// true if that value is present within the data, otherwise false</param>
         public BZip2MTFAndRLE2StageEncoder(int[] bwtBlock, int bwtLength, bool[] bwtValuesPresent)
         {
             this.bwtBlock = bwtBlock;

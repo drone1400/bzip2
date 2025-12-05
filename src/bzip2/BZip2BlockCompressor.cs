@@ -4,6 +4,7 @@
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
 // Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
+using System;
 namespace Bzip2
 {
     /// <summary>Compresses and writes a single BZip2 block</summary>
@@ -63,19 +64,18 @@ namespace Bzip2
 
         #region Public properties
 
-        /**
-         * Determines if any bytes have been written to the block
-         * @return true if one or more bytes has been written to the block, otherwise false
-         */
+        /// <summary>
+        /// Determines if any bytes have been written to the block.
+        /// True if one or more bytes has been written to the block, otherwise false.
+        /// </summary>
         public bool IsEmpty
         {
             get { return ((this.blockLength == 0) && (this.rleLength == 0)); }
         }
 
-        /**
-         * Gets the CRC of the completed block. Only valid after calling Close()
-         * @return The block's CRC
-         */
+        /// <summary>
+        /// Gets the CRC of the completed block. Only valid after calling Close().
+        /// </summary>
         public uint CRC
         {
             get { return this.crc.CRC; }
@@ -85,12 +85,13 @@ namespace Bzip2
 
         #region Public methods
 
-        /**
-         * Public constructor
-         * @param bitOutputStream The BZip2BitOutputStream to which compressed BZip2 data is written
-         * @param blockSize The declared block size in bytes. Up to this many bytes will be accepted
-         *                  into the block after Run-Length Encoding is applied
-         */
+
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="bitOutputStream">The BZip2BitOutputStream to which compressed BZip2 data is written</param>
+        /// <param name="blockSize">The declared block size in bytes. Up to this many bytes will be accepted
+        /// into the block after Run-Length Encoding is applied</param>
         public BZip2BlockCompressor(IBZip2BitOutputStream bitOutputStream, int blockSize)
         {
             this.bitOutputStream = bitOutputStream;
@@ -101,11 +102,11 @@ namespace Bzip2
             this.blockLengthLimit = blockSize - 6; // 5 bytes for one RLE run plus one byte - see Write(int)
         }
 
-        /**
-         * Writes a byte to the block, accumulating to an RLE run where possible
-         * @param value The byte to write
-         * @return true if the byte was written, or false if the block is already full
-         */
+        /// <summary>
+        /// Writes a byte to the block, accumulating to an RLE run where possible
+        /// </summary>
+        /// <param name="value">The byte to write</param>
+        /// <returns>True if the byte was written, or false if the block is already full</returns>
         public bool Write(int value)
         {
             if (this.blockLength > this.blockLengthLimit)
@@ -136,14 +137,14 @@ namespace Bzip2
             return true;
         }
 
-        /**
-         * Writes an array to the block
-         * @param data The array to write
-         * @param offset The offset within the input data to write from
-         * @param length The number of bytes of input data to write
-         * @return The actual number of input bytes written. May be less than the number requested, or
-         *         zero if the block is already full
-         */
+        /// <summary>
+        /// Writes an array to the block
+        /// </summary>
+        /// <param name="data">The array to write</param>
+        /// <param name="offset">The offset within the input data to write from</param>
+        /// <param name="length">The number of bytes of input data to write</param>
+        /// <returns>The actual number of input bytes written. May be less than the number requested, or
+        /// zero if the block is already full</returns>
         public int Write(byte[] data, int offset, int length)
         {
             var written = 0;
@@ -158,10 +159,8 @@ namespace Bzip2
             return written;
         }
 
-        /**
-         * Compresses and writes out the block
-         * Exception on any I/O error writing the data
-         */
+        /// <summary>Compresses and writes out the block.</summary>
+        /// <exception cref="Exception">Exception on any I/O error writing the data</exception>
         public void CloseBlock()
         {
             // If an RLE run is in progress, write it out
@@ -198,10 +197,10 @@ namespace Bzip2
 
         #region Private methods
 
-        /**
-         * Write the Huffman symbol to output byte map
-         * @Exception on any I/O error writing the data
-         */
+        /// <summary>
+        /// Write the Huffman symbol to output byte map
+        /// </summary>
+        /// <exception cref="Exception">on any I/O error writing the data</exception>
         private void WriteSymbolMap()
         {
             var condensedInUse = new bool[16];
@@ -234,11 +233,11 @@ namespace Bzip2
             }
         }
 
-        /**
-         * Writes an RLE run to the block array, updating the block CRC and present values array as required
-         * @param value The value to write
-         * @param runLength The run length of the value to write
-         */
+        /// <summary>
+        /// Writes an RLE run to the block array, updating the block CRC and present values array as required
+        /// </summary>
+        /// <param name="value">The value to write</param>
+        /// <param name="runLength">The run length of the value to write</param>
         private void WriteRun ( int value, int runLength)
         {
             this.blockValuesPresent[value] = true;

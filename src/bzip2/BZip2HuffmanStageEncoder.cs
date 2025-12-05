@@ -52,14 +52,14 @@ namespace Bzip2
 
         #region Public methods
 
-        /**
-         * Public constructor
-         * @param bitOutputStream The BZip2BitOutputStream to write to
-         * @param mtfBlock The MTF block data
-         * @param mtfLength The actual length of the MTF block
-         * @param mtfAlphabetSize The size of the MTF block's alphabet
-         * @param mtfSymbolFrequencies The frequencies the MTF block's symbols
-         */
+        /// <summary>
+        /// Public constructor
+        /// </summary>
+        /// <param name="bitOutputStream">The BZip2BitOutputStream to write to</param>
+        /// <param name="mtfBlock">The MTF block data</param>
+        /// <param name="mtfLength">The actual length of the MTF block</param>
+        /// <param name="mtfAlphabetSize">The size of the MTF block's alphabet</param>
+        /// <param name="mtfSymbolFrequencies">The frequencies the MTF block's symbols</param>
         public BZip2HuffmanStageEncoder(IBZip2BitOutputStream bitOutputStream, ushort[] mtfBlock, int mtfLength, int mtfAlphabetSize, int[] mtfSymbolFrequencies)
         {
             this.bitOutputStream = bitOutputStream;
@@ -75,10 +75,10 @@ namespace Bzip2
             this.selectors = new byte[(mtfLength + HUFFMAN_GROUP_RUN_LENGTH - 1) / HUFFMAN_GROUP_RUN_LENGTH];
         }
 
-        /**
-         * Encodes and writes the block data
-         * @Exception on any I/O error writing the data
-         */
+        /// <summary>
+        /// Encodes and writes the block data
+        /// </summary>
+        /// <exception cref="Exception">on any I/O error writing the data</exception>
         public void Encode()
         {
             // Create optimised selector list and Huffman tables
@@ -98,11 +98,12 @@ namespace Bzip2
 
         #region Private methods
 
-        /*
-         * Selects an appropriate table count for a given MTF length
-         * @param mtfLength The length to select a table count for
-         * @return The selected table count
-         */
+
+        /// <summary>
+        /// Selects an appropriate table count for a given MTF length
+        /// </summary>
+        /// <param name="mtfLength">The length to select a table count for</param>
+        /// <returns>The selected table count</returns>
         private static int selectTableCount (int mtfLength)
         {
             if (mtfLength >= 2400)
@@ -114,12 +115,13 @@ namespace Bzip2
             return mtfLength >= 200 ? 3 : 2;
         }
 
-        /*
-         * Generate a Huffman code length table for a given list of symbol frequencies
-         * @param alphabetSize The total number of symbols
-         * @param symbolFrequencies The frequencies of the symbols
-         * @param codeLengths The array to which the generated code lengths should be written
-         */
+        /// <summary>
+        /// Generate a Huffman code length table for a given list of symbol frequencies
+        /// </summary>
+        /// <param name="alphabetSize">The total number of symbols</param>
+        /// <param name="symbolFrequencies">The frequencies of the symbols</param>
+        /// <param name="codeLengths">The array to which the generated code lengths should be written</param>
+        /// <param name="index"></param>
         private static void generateHuffmanCodeLengths (int alphabetSize,  int[,] symbolFrequencies, int[,] codeLengths, int index)
         {
             var mergedFrequenciesAndIndices = new int[alphabetSize];
@@ -147,12 +149,12 @@ namespace Bzip2
                 codeLengths[index, mergedFrequenciesAndIndices[i] & 0x1ff] = sortedFrequencies[i];
         }
 
-        /*
-         * Generate initial Huffman code length tables, giving each table a different low cost section
-         * of the alphabet that is roughly equal in overall cumulative frequency. Note that the initial
-         * tables are invalid for actual Huffman code generation, and only serve as the seed for later
-         * iterative optimisation in optimiseSelectorsAndHuffmanTables(int)
-         */
+        /// <summary>
+        /// Generate initial Huffman code length tables, giving each table a different low cost section
+        /// of the alphabet that is roughly equal in overall cumulative frequency. Note that the initial
+        /// tables are invalid for actual Huffman code generation, and only serve as the seed for later
+        /// iterative optimisation in optimiseSelectorsAndHuffmanTables(int)
+        /// </summary>
         private void generateHuffmanOptimisationSeeds ()
         {
             int totalTables = huffmanCodeLengths.GetLength(0);
@@ -183,14 +185,14 @@ namespace Bzip2
             }
         }
 
-        /*
-         * Co-optimise the selector list and the alternative Huffman table code lengths. This method is
-         * called repeatedly in the hope that the total encoded size of the selectors, the Huffman code
-         * lengths and the block data encoded with them will converge towards a minimum.<br>
-         * If the data is highly incompressible, it is possible that the total encoded size will
-         * instead diverge (increase) slightly.<br>
-         * @param storeSelectors If true, write out the (final) chosen selectors
-         */
+        /// <summary>
+        /// Co-optimise the selector list and the alternative Huffman table code lengths. This method is
+        /// called repeatedly in the hope that the total encoded size of the selectors, the Huffman code
+        /// lengths and the block data encoded with them will converge towards a minimum. <br/>
+        /// If the data is highly incompressible, it is possible that the total encoded size will
+        /// instead diverge (increase) slightly. <br/>
+        /// </summary>
+        /// <param name="storeSelectors">If true, write out the (final) chosen selectors</param>
         private void optimiseSelectorsAndHuffmanTables (bool storeSelectors)
         {
             int totalTables = huffmanCodeLengths.GetLength(0);
@@ -287,10 +289,10 @@ namespace Bzip2
             }
         }
 
-        /**
-         * Write out the selector list and Huffman tables
-         * @Exception on any I/O error writing the data
-         */
+        /// <summary>
+        /// Write out the selector list and Huffman tables
+        /// </summary>
+        /// <exception cref="Exception">on any I/O error writing the data</exception>
         private void writeSelectorsAndHuffmanTables()
         {
             int totalSelectors = selectors.Length;
@@ -328,10 +330,10 @@ namespace Bzip2
             }
         }
 
-        /**
-         * Writes out the encoded block data
-         * @Exception on any I/O error writing the data
-         */
+        /// <summary>
+        /// Writes out the encoded block data
+        /// </summary>
+        /// <exception cref="Exception">on any I/O error writing the data</exception>
         private void writeBlockData()
         {
             int selectorIndex = 0;
