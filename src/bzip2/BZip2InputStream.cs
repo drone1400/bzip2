@@ -13,14 +13,29 @@ namespace Bzip2
     /// <remarks>Instances of this class are not threadsafe</remarks>
     public class BZip2InputStream : Stream
     {
+        public enum HeaderCheckType
+        {
+            // check for full header (ex: BZh9 )
+            FullHeader,
+            
+            // skips BZ part of header
+            NoBz,
+            
+            // skips BZh part of header
+            NoBzh,
+            
+            // skips BZh and block level, aka the whole header
+            NoHeader,
+        }
+        
         // The stream from which compressed BZip2 data is read and decoded
         private Stream inputStream;
+        
+        // True if the underlying stream will be closed with the current Stream
+        private readonly bool isOwner;
 
         // An InputStream wrapper that provides bit-level reads
         private BZip2BitInputStream bitInputStream;
-
-        // If true, the caller is assumed to have read away the stream's leading "BZ" identifier bytes
-        private readonly bool headerless;
 
         // (@code true} if the end of the compressed stream has been reached, otherwise false
         private bool streamComplete;
@@ -40,24 +55,20 @@ namespace Bzip2
         // The decompressor for the current block
         private BZip2BlockDecompressor blockDecompressor;
         
+        
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The InputStream to wrap</param>
-        /// <param name="headerless">If true, the caller is assumed to have read away the stream's 
-        /// leading "BZ" identifier bytes</param>
-        public BZip2InputStream(Stream inputStream, bool headerless)
+        /// <param name="isOwner">if true, will close the stream when done</param>
+        /// <param name="headerCheck"><see cref="HeaderCheckType"/></param>
+        /// <param name="manualBlockLevel">Used when <see cref="headerCheck"/> is NoHeader</param>
+        public BZip2InputStream(Stream inputStream, bool isOwner = true, HeaderCheckType headerCheck = HeaderCheckType.FullHeader, int manualBlockLevel = 9)
         {
-
-            if (inputStream == null)
-            {
-                throw new ArgumentException("Null input stream");
-            }
-
-            this.inputStream = inputStream;
+            this.inputStream = inputStream ?? throw new ArgumentException("Null input stream");
             this.bitInputStream = new BZip2BitInputStream(inputStream);
-            this.headerless = headerless;
+            this.isOwner = isOwner;
 
             // initialize stream immediately
-            this.InitializeStream();
+            this.InitializeStream(headerCheck, manualBlockLevel);
             // prepare first block
             this.InitializeNextBlock();
         }
@@ -137,7 +148,10 @@ namespace Bzip2
 
             try
             {
-                this.inputStream.Close();
+                if (this.isOwner)
+                {
+                    this.inputStream.Close();
+                }
             } finally
             {
                 this.inputStream = null;
@@ -150,7 +164,7 @@ namespace Bzip2
 
         /// <summary>Reads the stream header and checks that the data appears to be a valid BZip2 stream</summary>
         /// <exception cref="IOException">if the stream header is not valid</exception>
-        private void InitializeStream() 
+        private void InitializeStream(HeaderCheckType headerCheck, int blockLevel) 
         {
             /* If the stream has been explicitly closed, throw an exception */
             if (this.bitInputStream == null)
@@ -163,18 +177,44 @@ namespace Bzip2
             // Read the stream header
             try
             {
-                uint marker1 = this.headerless ? 0 : this.bitInputStream.ReadBits(16);
-                uint marker2 = this.bitInputStream.ReadBits (8);
-                uint blockSize = (this.bitInputStream.ReadBits(8) - '0');
-
-                if ((!this.headerless && (marker1 != BZip2Constants.STREAM_START_MARKER_1))
-                    || (marker2 != BZip2Constants.STREAM_START_MARKER_2)
-                    || (blockSize < 1) || (blockSize > 9))
+                switch (headerCheck)
                 {
-                    throw new IOException("Invalid BZip2 header");
+                    case HeaderCheckType.FullHeader:
+                    {
+                        uint marker1 = this.bitInputStream.ReadBits(16);
+                        uint marker2 = this.bitInputStream.ReadBits(8);
+                        blockLevel = ((int)this.bitInputStream.ReadBits(8) - '0');
+                        if (marker1 != BZip2Constants.STREAM_START_MARKER_1 ||
+                            marker2 !=  BZip2Constants.STREAM_START_MARKER_2 ||
+                            blockLevel < 1 ||  blockLevel > 9)
+                        {
+                            throw new IOException("Invalid BZip2 header");
+                        }
+                        break;
+                    }
+                    case HeaderCheckType.NoBz:
+                    {
+                        uint marker2 = this.bitInputStream.ReadBits(8);
+                        blockLevel = ((int)this.bitInputStream.ReadBits(8) - '0');
+                        if (marker2 !=  BZip2Constants.STREAM_START_MARKER_2 ||
+                            blockLevel < 1 ||  blockLevel > 9)
+                        {
+                            throw new IOException("Invalid BZip2 header");
+                        }
+                        break;
+                    }
+                    case HeaderCheckType.NoBzh:
+                    {
+                        blockLevel = ((int)this.bitInputStream.ReadBits(8) - '0');
+                        if (blockLevel < 1 ||  blockLevel > 9)
+                        {
+                            throw new IOException("Invalid BZip2 header");
+                        }
+                        break;
+                    }
                 }
 
-                this.streamBlockSize = blockSize * 100000;
+                this.streamBlockSize = (uint)(blockLevel * 100000);
             } catch (IOException)
             {
                 // If the stream header was not valid, stop trying to read more data
