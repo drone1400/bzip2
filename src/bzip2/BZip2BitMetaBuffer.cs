@@ -18,7 +18,7 @@ namespace Bzip2
     {
         private struct Bzip2BitDataPair
         {
-            public byte BitN { get;}
+            public byte BitN { get; }
             public uint BitV { get; }
             public Bzip2BitDataPair(byte bitN, uint bitV)
             {
@@ -26,12 +26,12 @@ namespace Bzip2
                 this.BitV = bitV;
             }
         }
-        
+
         public int DataPairCount { get => this._data.Count; }
-        
+
         private List<Bzip2BitDataPair> _data;
 
-        
+
         /// <summary>
         /// Compressed block CRC to be stored here when block is finished
         /// </summary>
@@ -56,7 +56,7 @@ namespace Bzip2
         public int LoadedBytes { get => this._loadedBytes; }
         private int _loadedBytes = 0;
         private BZip2BlockCompressor _compressor;
-        
+
         /// <summary>
         /// Public constructor
         /// </summary>
@@ -74,13 +74,13 @@ namespace Bzip2
         /// </summary>
         /// <param name="value">Byte</param>
         /// <returns>True if byte was loaded, false if byte could not be loaded because block compressor is full</returns>
-        public bool LoadByte(byte value) {
+        public bool LoadByte(byte value)
+        {
             if (this._compressor == null)
-            {
                 return false;
-            }
-            
-            if (this._compressor.Write(value)) {
+
+            if (this._compressor.Write(value))
+            {
                 this._loadedBytes++;
                 return true;
             }
@@ -98,15 +98,15 @@ namespace Bzip2
         /// <param name="offset">Byte buffer offset</param>
         /// <param name="length">Number of bytes to load</param>
         /// <returns>Number of bytes actually loaded</returns>
-        public int LoadBytes(byte[] buff, int offset, int length) {
+        public int LoadBytes(byte[] buff, int offset, int length)
+        {
             if (this._compressor == null)
-            {
                 return 0;
-            }
-            
+
             int count = this._compressor.Write(buff, offset, length);
             this._loadedBytes += count;
-            if (count < length) {
+            if (count < length)
+            {
                 // could not load all the bytes, means block is full
                 this._isFull = true;
             }
@@ -116,25 +116,25 @@ namespace Bzip2
         /// <summary>
         /// Starts the actual compression
         /// </summary>
-        public void CompressBytes() {
+        public void CompressBytes()
+        {
             if (this._compressor == null)
-            {
                 return;
-            }
-            
+
             this._compressor.CloseBlock();
             this._blockCrc = this._compressor.CRC;
-            
+
             // set compressor to null so it can be garbage collected later
             this._compressor = null;
         }
-        
+
         /// <summary>
         /// Writes all the buffer data to the real <see cref="BZip2BitOutputStream"/>
         /// </summary>
         /// <param name="stream">The real bit output stream</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        public void WriteToRealOutputStream(BZip2BitOutputStream stream) {
+        public void WriteToRealOutputStream(BZip2BitOutputStream stream)
+        {
             for (int i = 0; i < this._data.Count; i++)
             {
                 stream.WriteBits(this._data[i].BitN, this._data[i].BitV);
@@ -143,18 +143,20 @@ namespace Bzip2
 
         #region IBZip2BitOutputStream implementation
 
-        public void WriteBoolean (bool value) 
+        public void WriteBoolean (bool value)
         {
             this._data.Add(new Bzip2BitDataPair(1, value ? (uint)1 : (uint)0));
         }
-        
-        public void WriteUnary (int value)  
+
+        public void WriteUnary (int value)
         {
-            while (value >= 8) {
+            while (value >= 8)
+            {
                 this._data.Add(new Bzip2BitDataPair(8, 0xFF));
                 value -= 8;
             }
-            switch (value) {
+            switch (value)
+            {
                 case 7: this._data.Add(new Bzip2BitDataPair(7, 0x7F)); break;
                 case 6: this._data.Add(new Bzip2BitDataPair(6, 0x3F)); break;
                 case 5: this._data.Add(new Bzip2BitDataPair(5, 0x1F)); break;
@@ -163,27 +165,26 @@ namespace Bzip2
                 case 2: this._data.Add(new Bzip2BitDataPair(2, 0x03)); break;
                 case 1: this._data.Add(new Bzip2BitDataPair(1, 0x01)); break;
             }
-            
+
             this._data.Add(new Bzip2BitDataPair(1, 0x00));
         }
-        
-        public void WriteBits (int count,  uint value) 
+
+        public void WriteBits (int count,  uint value)
         {
             this._data.Add(new Bzip2BitDataPair((byte)count, value));
         }
 
-        public void WriteInteger (uint value)  
+        public void WriteInteger (uint value)
         {
             this.WriteBits (16, (value >> 16) & 0xffff);
             this.WriteBits (16, value & 0xffff);
         }
-        
+
         /// <summary>
         /// For compliance with interface, doesn't do anything
         /// </summary>
-        public void Flush() {
-            
-        }
+        public void Flush()
+        { }
 
         #endregion
     }

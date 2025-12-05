@@ -17,15 +17,16 @@ namespace Bzip2
     internal class BZip2BitOutputStream : IBZip2BitOutputStream
     {
         #region Private fields
+
         // The stream to which bits are written
-		private readonly Stream outputStream;
+        private readonly Stream outputStream;
 
-		// A buffer of bits waiting to be written to the output stream	 
-		private uint bitBuffer;
+        // A buffer of bits waiting to be written to the output stream	 
+        private uint bitBuffer;
 
-		// The number of bits currently buffered in bitBuffer
-		private int bitCount;
-		
+        // The number of bits currently buffered in bitBuffer
+        private int bitCount;
+
 		#endregion
 
         /// <summary>
@@ -38,53 +39,54 @@ namespace Bzip2
         }
 
         #region IBZip2BitOutputStream implementation
-        
-		public void WriteBoolean (bool value)
+
+        public void WriteBoolean (bool value)
         {
             this.bitCount++;
-			this.bitBuffer |= ((value ? 1u : 0u) << (32 - bitCount));
+            this.bitBuffer |= ((value ? 1u : 0u) << (32 - bitCount));
 
-			if (bitCount == 8)
+            if (bitCount == 8)
             {
-				this.outputStream.WriteByte((byte)(bitBuffer >> 24));
-				bitBuffer = 0;
-				bitCount = 0;
-			}
-		}
-		
-		public void WriteUnary (int value)  
-        {
-			while (value-- > 0)
-            {
-				this.WriteBoolean (true); 
-			}
-			this.WriteBoolean (false);
-		}
-		
-		public void WriteBits (int count,  uint value) 
-        {
-			this.bitBuffer |= ((value << (32 - count)) >> bitCount);
-			this.bitCount += count;
+                this.outputStream.WriteByte((byte)(bitBuffer >> 24));
+                bitBuffer = 0;
+                bitCount = 0;
+            }
+        }
 
-			while (bitCount >= 8)
+        public void WriteUnary (int value)
+        {
+            while (value-- > 0)
             {
-				this.outputStream.WriteByte((byte)(bitBuffer >> 24));
-				bitBuffer <<= 8;
-				bitCount -= 8;
-			}
-		}
-		
-		public void WriteInteger (uint value)  
+                this.WriteBoolean (true);
+            }
+            this.WriteBoolean (false);
+        }
+
+        public void WriteBits (int count,  uint value)
         {
-			this.WriteBits (16, (value >> 16) & 0xffff);
-			this.WriteBits (16, value & 0xffff);
-		}
-		
-		public void Flush()  
+            this.bitBuffer |= ((value << (32 - count)) >> bitCount);
+            this.bitCount += count;
+
+            while (bitCount >= 8)
+            {
+                this.outputStream.WriteByte((byte)(bitBuffer >> 24));
+                bitBuffer <<= 8;
+                bitCount -= 8;
+            }
+        }
+
+        public void WriteInteger (uint value)
         {
-			if (this.bitCount > 0) 
-				this.WriteBits (8 - this.bitCount, 0);
-		}
+            this.WriteBits (16, (value >> 16) & 0xffff);
+            this.WriteBits (16, value & 0xffff);
+        }
+
+        public void Flush()
+        {
+            if (this.bitCount > 0)
+                this.WriteBits (8 - this.bitCount, 0);
+        }
+
         #endregion
     }
 }

@@ -3,12 +3,13 @@
 
 using System;
 
-namespace Bzip2 
+namespace Bzip2
 {
     /// <summary>
     /// Interface for a stream wrapper that implements bit-wise write operations
     /// </summary>
-    internal interface IBZip2BitOutputStream {
+    internal interface IBZip2BitOutputStream
+    {
         /// <summary>
         /// Writes a single bit to the wrapped output stream
         /// </summary>
@@ -37,7 +38,7 @@ namespace Bzip2
         /// <param name="value">The integer to write</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
         void WriteInteger (uint value) ;
-        
+
         /// <summary>
         /// Writes any remaining bits to the output stream, zero padding to a whole byte as required
         /// </summary>

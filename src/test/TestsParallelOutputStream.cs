@@ -8,7 +8,8 @@ using Xunit.Abstractions;
 
 namespace Bzip2.test
 {
-    public class TestsParallelOutputStream {
+    public class TestsParallelOutputStream
+    {
         private readonly ITestOutputHelper _console;
         private readonly int _threads;
         private readonly Random _random;
@@ -22,9 +23,9 @@ namespace Bzip2.test
 
 
         [Fact]
-        public void RandomSingleByteLongTestX1() => this.RandomSingleByteLongTestX(1,100000000);
+        public void RandomSingleByteLongTestX1() => this.RandomSingleByteLongTestX(1, 100000000);
         [Fact]
-        public void RandomSingleByteLongTestX10() => this.RandomSingleByteLongTestX(10,100000000);
+        public void RandomSingleByteLongTestX10() => this.RandomSingleByteLongTestX(10, 100000000);
 
         [Fact]
         public void RandomLongTestX1() => this.RandomLongTestX(1);
@@ -47,16 +48,19 @@ namespace Bzip2.test
         [Fact]
         public void RandomLongTestWithRepeatedValuesX1000() => this.RandomLongTestWithRepeatedValuesX(1000);
 
-        private void RandomSingleByteLongTestX(int x, int len = 9000000) {
+        private void RandomSingleByteLongTestX(int x, int len = 9000000)
+        {
             TimeSpan totalCompressionTime = TimeSpan.Zero;
             TimeSpan totalDecompressionTime = TimeSpan.Zero;
-            for (int r = 0; r < x; r++) {
+            for (int r = 0; r < x; r++)
+            {
 
                 byte[] bigBufferI = new byte[len];
                 byte[] bigBufferO = new byte[len];
 
                 byte value = (byte)(_random.Next() & 0xFF);
-                for (int i = 0; i < len; i++) {
+                for (int i = 0; i < len; i++)
+                {
                     bigBufferI[i] = value;
                 }
 
@@ -72,7 +76,8 @@ namespace Bzip2.test
         {
             TimeSpan totalCompressionTime = TimeSpan.Zero;
             TimeSpan totalDecompressionTime = TimeSpan.Zero;
-            for (int r = 0; r < repeat; r++) {
+            for (int r = 0; r < repeat; r++)
+            {
 
                 byte[] bigBufferI = new byte[len];
                 byte[] bigBufferO = new byte[len];
@@ -89,10 +94,12 @@ namespace Bzip2.test
             this._console.WriteLine($"AVERAGE {totalDecompressionTime.TotalMilliseconds / repeat} ms decompression time... ");
         }
 
-        private void RandomLongTestWithRepeatedValuesX(int repeat, int len = 9000000) {
+        private void RandomLongTestWithRepeatedValuesX(int repeat, int len = 9000000)
+        {
             TimeSpan totalCompressionTime = TimeSpan.Zero;
             TimeSpan totalDecompressionTime = TimeSpan.Zero;
-            for (int r = 0; r < repeat; r++) {
+            for (int r = 0; r < repeat; r++)
+            {
                 int repeatStreaks = 64;
                 byte[] bigBufferI = new byte[len];
                 byte[] bigBufferO = new byte[len];
@@ -101,12 +108,14 @@ namespace Bzip2.test
                 this._random.NextBytes(bigBufferI);
 
                 int offset = 0;
-                for (int rs = 0; rs < repeatStreaks; rs++) {
+                for (int rs = 0; rs < repeatStreaks; rs++)
+                {
                     int newoffset = this._random.Next(0, (len - 10000) / repeatStreaks);
                     offset += newoffset;
                     int count = this._random.Next(0, 512);
                     byte val = bigBufferI[offset++];
-                    for (int i = 0; i < count; i++) {
+                    for (int i = 0; i < count; i++)
+                    {
                         bigBufferI[offset++] = val;
                     }
                 }
@@ -131,7 +140,8 @@ namespace Bzip2.test
             TimeSpan compressionTime = TimeSpan.Zero;
             TimeSpan decompressionTime = TimeSpan.Zero;
 
-            try {
+            try
+            {
 
                 start = DateTime.Now;
                 using BZip2ParallelOutputStream compressor = new BZip2ParallelOutputStream(output, this._threads, false, 9);
@@ -148,7 +158,8 @@ namespace Bzip2.test
                 end = DateTime.Now;
                 decompressionTime = end - start;
                 this._console.WriteLine($"{decompressionTime.TotalMilliseconds} ms decompression time");
-            } catch (Exception ex) {
+            } catch (Exception ex)
+            {
                 string randomFile = Path.GetRandomFileName();
                 using FileStream fs = new FileStream(randomFile, FileMode.Create, FileAccess.Write);
                 input.Position = 0;
@@ -158,8 +169,10 @@ namespace Bzip2.test
                 Assert.Fail($"Exception was thrown... {ex}");
             }
 
-            for (int i = 0; i < inputBuffer.Length; i++) {
-                if (inputBuffer[i] != outputBuffer[i]) {
+            for (int i = 0; i < inputBuffer.Length; i++)
+            {
+                if (inputBuffer[i] != outputBuffer[i])
+                {
                     string randomFile = Path.GetRandomFileName();
                     using FileStream fs = new FileStream(randomFile, FileMode.Create, FileAccess.Write);
                     input.Position = 0;

@@ -11,9 +11,10 @@ namespace Bzip2
 {
     /// <summary>An OutputStream wrapper that compresses BZip2 data</summary>
     /// <remarks>Instances of this class are not threadsafe</remarks>
-    public class BZip2OutputStream : Stream 
-	{
+    public class BZip2OutputStream : Stream
+    {
         #region Private fields
+
         // The stream to which compressed BZip2 data is written
         private Stream outputStream;
 
@@ -34,9 +35,11 @@ namespace Bzip2
 
         // True if the underlying stream will be closed with the current Stream
         private bool isOwner;
+
         #endregion
 
         #region internal fields
+
         /// <summary>The first 2 bytes of a Bzip2 marker</summary> 
         internal const uint STREAM_START_MARKER_1 = 0x425a;
 
@@ -48,9 +51,11 @@ namespace Bzip2
 
         /// <summary>Last three bytes of the end of stream marker</summary> 
         internal const uint STREAM_END_MARKER_2 = 0x385090;
+
         #endregion
 
         #region Public methods
+
         /// <summary>Public constructor</summary>
         /// <param name="outputStream">The output stream to write to</param>
         /// <param name="blockSizeMultiplier">The BZip2 block size as a multiple of 100,000 bytes (minimum 1, maximum 9)</param>
@@ -77,62 +82,75 @@ namespace Bzip2
 
             this.InitialiseNextBlock();
         }
+
         #endregion
 
         #region Implementation of abstract members of Stream
+
         #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public override void Flush ()
-		{
-			throw new NotImplementedException ();
-		}
+        {
+            throw new NotImplementedException ();
+        }
 
-		public override int Read (byte[] buffer, int offset, int count)
-		{
-			throw new NotImplementedException ();
-		}
+        public override int Read (byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException ();
+        }
 
-		public override long Seek (long offset, SeekOrigin origin)
-		{
-			throw new NotImplementedException ();
-		}
+        public override long Seek (long offset, SeekOrigin origin)
+        {
+            throw new NotImplementedException ();
+        }
 
-		public override void SetLength (long value)
-		{
-			throw new NotImplementedException ();
-		}
+        public override void SetLength (long value)
+        {
+            throw new NotImplementedException ();
+        }
 
-		public override bool CanRead {
-			get {
-				return false;
-			}
-		}
+        public override bool CanRead
+        {
+            get
+            {
+                return false;
+            }
+        }
 
-		public override bool CanSeek {
-			get {
-				return false;
-			}
-		}
+        public override bool CanSeek
+        {
+            get
+            {
+                return false;
+            }
+        }
 
-		public override bool CanWrite {
-			get {
-				return true;
-			}
-		}
+        public override bool CanWrite
+        {
+            get
+            {
+                return true;
+            }
+        }
 
-		public override long Length {
-			get {
-				throw new NotImplementedException ();
-			}
-		}
+        public override long Length
+        {
+            get
+            {
+                throw new NotImplementedException ();
+            }
+        }
 
-		public override long Position {
-			get {
-				throw new NotImplementedException ();
-			}
-			set {
-				throw new NotImplementedException ();
-			}
-		}
+        public override long Position
+        {
+            get
+            {
+                throw new NotImplementedException ();
+            }
+            set
+            {
+                throw new NotImplementedException ();
+            }
+        }
 
         public override void WriteByte(byte value)
         {
@@ -172,36 +190,39 @@ namespace Bzip2
         }
 
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
-        protected override void Dispose(bool disposing) {
-	        if (this.outputStream != null)
-	        {
-		        this.Finish();
-		        if (isOwner)
-			        this.outputStream.Close();
-		        this.outputStream = null;
-	        }
+        protected override void Dispose(bool disposing)
+        {
+            if (this.outputStream != null)
+            {
+                this.Finish();
+                if (isOwner)
+                    this.outputStream.Close();
+                this.outputStream = null;
+            }
         }
-        
+
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
         #endregion
 
         #region Private methods
+
         /// <summary>Initialises a new block for compression</summary> 
-		private void InitialiseNextBlock() 
-		{
-			this.blockCompressor = new BZip2BlockCompressor (this.bitOutputStream, this.streamBlockSize);
-		}
+        private void InitialiseNextBlock()
+        {
+            this.blockCompressor = new BZip2BlockCompressor (this.bitOutputStream, this.streamBlockSize);
+        }
 
         /// <summary>Compress and write out the block currently in progress</summary>
         /// <remarks>If no bytes have been written to the block, it is discarded</remarks>
         /// <exception>On any I/O error writing to the output stream</exception>
         private void CloseBlock()
         {
-			if (this.blockCompressor.IsEmpty) 
-				return;
+            if (this.blockCompressor.IsEmpty)
+                return;
 
-			this.blockCompressor.CloseBlock();
-			this.streamCRC = ((this.streamCRC << 1) | (this.streamCRC >> 31)) ^ this.blockCompressor.CRC;
+            this.blockCompressor.CloseBlock();
+            this.streamCRC = ((this.streamCRC << 1) | (this.streamCRC >> 31)) ^ this.blockCompressor.CRC;
         }
 
         /// <summary>Compresses and writes out any as yet unwritten data, then writes the end of the BZip2 stream</summary>
@@ -209,21 +230,24 @@ namespace Bzip2
         /// <exception>On any I/O error writing to the output stream</exception>
         private void Finish()
         {
-			if (!this.streamFinished)
+            if (!this.streamFinished)
             {
-				this.streamFinished = true;
-				try {
-					this.CloseBlock();
-					this.bitOutputStream.WriteBits(24, STREAM_END_MARKER_1);
-					this.bitOutputStream.WriteBits(24, STREAM_END_MARKER_2);
-					this.bitOutputStream.WriteInteger(this.streamCRC);
-					this.bitOutputStream.Flush();
-					this.outputStream.Flush();
-				} finally {
-					this.blockCompressor = null;
-				}
-			}
+                this.streamFinished = true;
+                try
+                {
+                    this.CloseBlock();
+                    this.bitOutputStream.WriteBits(24, STREAM_END_MARKER_1);
+                    this.bitOutputStream.WriteBits(24, STREAM_END_MARKER_2);
+                    this.bitOutputStream.WriteInteger(this.streamCRC);
+                    this.bitOutputStream.Flush();
+                    this.outputStream.Flush();
+                } finally
+                {
+                    this.blockCompressor = null;
+                }
+            }
         }
+
         #endregion
     }
 }

@@ -9,12 +9,14 @@ using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bzip2.test {
+namespace Bzip2.test
+{
 
     /// <summary>
     /// Unit test for the BZip2 compression library
     /// </summary>
-    public class Tests {
+    public class Tests
+    {
 
         private const int BufferSizeLarge = 10000000; // Almost 10 Mb
         private const int BufferSizeSmall = 100000;   // Around 100 Kb
@@ -39,8 +41,10 @@ namespace Bzip2.test {
         /// The buffer has different values
         /// </summary>
         [Fact]
-        public void CrcAlgorithmDifferentValues() {
-            byte[] buffer = {
+        public void CrcAlgorithmDifferentValues()
+        {
+            byte[] buffer =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA
             };
 
@@ -56,7 +60,8 @@ namespace Bzip2.test {
         /// The buffer has different values
         /// </summary>
         [Fact]
-        public void CrcAlgorithmSameValues() {
+        public void CrcAlgorithmSameValues()
+        {
             var crc = new CRC32();
             crc.UpdateCrc(0x55, 10);
             Assert.Equal(0xA1E07747, crc.CRC);
@@ -66,7 +71,8 @@ namespace Bzip2.test {
         /// Compresses the full buffer and checks for a reasonable compressed size
         /// </summary>
         [Fact]
-        public void CompressSmokeLarge() {
+        public void CompressSmokeLarge()
+        {
             var input = new MemoryStream(Buffer);
             var output = new MemoryStream();
 
@@ -83,7 +89,8 @@ namespace Bzip2.test {
         /// Compresses a portion of the buffer and checks for a reasonable compressed size
         /// </summary>
         [Fact]
-        public void CompressSmokeSmall() {
+        public void CompressSmokeSmall()
+        {
             var input = new MemoryStream(Buffer, 0, BufferSizeSmall);
             var output = new MemoryStream();
 
@@ -100,7 +107,8 @@ namespace Bzip2.test {
         /// Compresses and decompresses a long random buffer
         /// </summary>
         [Fact]
-        public void CompressAndDecompress() {
+        public void CompressAndDecompress()
+        {
             var input = new MemoryStream(Buffer);
             var output = new MemoryStream();
 
@@ -117,8 +125,10 @@ namespace Bzip2.test {
 
             Assert.Equal(Buffer.Length, output2.Length);
             output2.Position = 0;
-            for (int i = 0; i < Buffer.Length; i++) {
-                if (Buffer[i] != (byte)output2.ReadByte()) {
+            for (int i = 0; i < Buffer.Length; i++)
+            {
+                if (Buffer[i] != (byte)output2.ReadByte())
+                {
                     Assert.Fail($"bytes differ at position {i}");
                 }
             }

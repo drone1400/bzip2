@@ -6,13 +6,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace Bzip2 {
-    
+namespace Bzip2
+{
+
     /// <summary>An OutputStream wrapper that compresses BZip2 data using multiple threads</summary>
     /// <remarks>Instances of this class are not threadsafe</remarks>
-    public class BZip2ParallelOutputStream : Stream{
+    public class BZip2ParallelOutputStream : Stream
+    {
         #region  Private Fields
-        
+
         // is there a point to limit this?...
         private const int ABSOLUTE_MAX_THREADS = 128;
 
@@ -22,7 +24,7 @@ namespace Bzip2 {
 
         // max number of active threads
         private readonly int _mtCompressorThreads = 0;
-        
+
         // number of active threads
         private int _mtActiveThreads = 0;
         private int _mtNextThreadId = 0;
@@ -45,21 +47,22 @@ namespace Bzip2 {
 
         // The output stream
         private readonly Stream _outputStream;
-        
+
         // The bit output stream
         private readonly BZip2BitOutputStream _bitStream;
-        
+
         // The merged CRC of all blocks compressed so far
         private uint _streamCrc = 0;
-        
+
         //
         private BZip2BitMetaBuffer _currentBlockBuffer = null;
-        
+
         // True if the underlying stream will be closed with the current Stream
         private readonly bool _isOwner;
 
         // for debug purposes...
         // private int _debugMaxMetaBufferDataPairCount = 0;
+
         #endregion
 
         /// <summary>
@@ -78,7 +81,7 @@ namespace Bzip2 {
             if (blockLevel < 1 ) blockLevel = 1;
             if (blockLevel > 9 ) blockLevel = 9;
             this._blockLevel = blockLevel;
-            
+
             // evaluate thread count
             if (compressorThreads < 1) compressorThreads = 1;
             if (compressorThreads > ABSOLUTE_MAX_THREADS) compressorThreads = ABSOLUTE_MAX_THREADS;
@@ -86,19 +89,22 @@ namespace Bzip2 {
 
             // supposedly a block can only expand 1.25x, so 0.8 of normal block size should always be safe...
             this._compressBlockSize = 100000 * this._blockLevel;
-            
+
             // initialize initial meta buffer
             this._currentBlockBuffer = new BZip2BitMetaBuffer(this._compressBlockSize, this._mtNextInputBlockId++);
 
             this._isOwner = isOwner;
-            
+
             // write the bz2 header...
             this.WriteBz2Header();
         }
 
-        private bool TryCreateNewProcessingThread() {
-            lock (this._syncRootActiveThread) {
-                if (this._mtActiveThreads < this._mtCompressorThreads) {
+        private bool TryCreateNewProcessingThread()
+        {
+            lock (this._syncRootActiveThread)
+            {
+                if (this._mtActiveThreads < this._mtCompressorThreads)
+                {
                     Thread thread = new Thread(this.MultiThreadWorkerAction)
                     {
                         Name = $"PBZip2 - Thread #{this._mtNextThreadId++}",
@@ -117,14 +123,16 @@ namespace Bzip2 {
 
         private bool TryWriteOutputBlockAndIncrementId()
         {
-            if (this._unsafeFatalException) {
+            if (this._unsafeFatalException)
+            {
                 throw new Exception("One of the compression threads somehow failed... This should never happen.");
             }
 
-            
-            try {
+
+            try
+            {
                 int blockId = this._mtNextOutputBlockId;
-                
+
                 BZip2BitMetaBuffer currentOutput = null;
 
                 lock (this._syncRootProcesing)
@@ -144,20 +152,19 @@ namespace Bzip2 {
                 this._streamCrc = ((this._streamCrc << 1) | (this._streamCrc >> 31)) ^ currentOutput.BlockCrc;
 
                 currentOutput.WriteToRealOutputStream(this._bitStream);
-                
+
                 this._mtNextOutputBlockId = blockId + 1;
                 return true;
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
                 // set this without any locks...
                 this._unsafeFatalException = true;
 
                 // rethrow exception, hopefully something catches it?...
-                throw new Exception("BZip2 error writing output data! See inner exception for details!",ex);
+                throw new Exception("BZip2 error writing output data! See inner exception for details!", ex);
             }
         }
-        
+
         private void MultiThreadWorkerAction()
         {
             try
@@ -175,17 +182,17 @@ namespace Bzip2 {
                         if (this._mtPendingBlocksQueue.Count > 0)
                         {
                             buff = this._mtPendingBlocksQueue.Dequeue();
-                        }
-                        else if (this._mtStreamIsFinished)
+                        } else if (this._mtStreamIsFinished)
                         {
                             // thread can not do anything else, time to stop
                             return;
                         }
                     }
 
-                    if (buff != null) {
+                    if (buff != null)
+                    {
                         buff.CompressBytes();
-                        
+
                         // if (buff.DataPairCount > this._debugMaxMetaBufferDataPairCount) {
                         //     this._debugMaxMetaBufferDataPairCount = buff.DataPairCount;
                         // }
@@ -195,21 +202,18 @@ namespace Bzip2 {
                         {
                             this._mtProcessedBlocks.Add(buff.BlockId, buff);
                         }
-                    }
-                    else
+                    } else
                     {
                         Thread.Sleep(1);
                     }
                 }
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
                 // set this without any locks...
                 this._unsafeFatalException = true;
-                
-                throw new Exception("BZip2 Processing thread somehow crashed... See inner exception for details!",ex);
-            }
-            finally
+
+                throw new Exception("BZip2 Processing thread somehow crashed... See inner exception for details!", ex);
+            } finally
             {
                 lock (this._syncRootActiveThread)
                 {
@@ -221,9 +225,9 @@ namespace Bzip2 {
         private void WriteBz2Header()
         {
             // write BZIP file header
-            this._bitStream.WriteBits(8, 0x42); // B
-            this._bitStream.WriteBits(8, 0x5A); // Z
-            this._bitStream.WriteBits(8, 0x68); // h
+            this._bitStream.WriteBits(8, 0x42);                            // B
+            this._bitStream.WriteBits(8, 0x5A);                            // Z
+            this._bitStream.WriteBits(8, 0x68);                            // h
             this._bitStream.WriteBits(8, (uint)(0x30 + this._blockLevel)); // block level digit
         }
 
@@ -245,18 +249,21 @@ namespace Bzip2 {
             this._bitStream.Flush();
             this._outputStream.Flush();
         }
-        
-        private bool EnqueueCurrentBlockBuffer() {
+
+        private bool EnqueueCurrentBlockBuffer()
+        {
             if (this._currentBlockBuffer.LoadedBytes > 0)
             {
                 // make sure queue is not flooded with buffers, wait if that's the case...
-                while (true) {
+                while (true)
+                {
                     bool canQueueUpMoreBlocks;
-                    
-                    lock (this._syncRootProcesing) {
+
+                    lock (this._syncRootProcesing)
+                    {
                         canQueueUpMoreBlocks = this._mtPendingBlocksQueue.Count < this._mtCompressorThreads * 10;
                     }
-                    
+
                     if (canQueueUpMoreBlocks) break;
 
                     // try writing output block and keep doing so while successful
@@ -269,7 +276,7 @@ namespace Bzip2 {
                     this._mtPendingBlocksQueue.Enqueue(this._currentBlockBuffer);
                     this._currentBlockBuffer = new BZip2BitMetaBuffer(this._compressBlockSize, this._mtNextInputBlockId++);
                 }
-                
+
                 // since we enqueued a buffer, make sure there's an active processing thread to deal with it
                 this.TryCreateNewProcessingThread();
 
@@ -278,33 +285,40 @@ namespace Bzip2 {
 
             return false;
         }
-        
-        
-        private void FinishBitstream() {
-            lock (this._syncRootProcesing) {
+
+
+        private void FinishBitstream()
+        {
+            lock (this._syncRootProcesing)
+            {
                 if (this._mtStreamIsFinished) return;
                 this._mtStreamIsFinished = true;
             }
 
             // check if there is still data left to write
-            if (this._currentBlockBuffer.LoadedBytes > 0) {
+            if (this._currentBlockBuffer.LoadedBytes > 0)
+            {
                 this.EnqueueCurrentBlockBuffer();
             }
 
             // decrement next input block since no longer getting another block
             this._mtNextInputBlockId--;
 
-            while (true) {
-                lock (this._syncRootProcesing) {
+            while (true)
+            {
+                lock (this._syncRootProcesing)
+                {
                     if (this._mtNextInputBlockId == this._mtNextOutputBlockId &&
-                        this._mtActiveThreads == 0) {
+                        this._mtActiveThreads == 0)
+                    {
                         // all done, can safely exit
                         break;
                     }
                 }
 
                 // check if there are more queued blocks than active threads, create threads while that is the case
-                while (this._mtPendingBlocksQueue.Count > this._mtActiveThreads) {
+                while (this._mtPendingBlocksQueue.Count > this._mtActiveThreads)
+                {
                     this.TryCreateNewProcessingThread();
                 }
 
@@ -313,94 +327,115 @@ namespace Bzip2 {
             }
 
             // sanity check, this should be impossible and should be caught by some test right?...
-            lock (this._syncRootProcesing) {
+            lock (this._syncRootProcesing)
+            {
                 if (this._mtActiveThreads != 0 ||
                     this._mtPendingBlocksQueue.Count > 0 ||
-                    this._mtProcessedBlocks.Count > 0) {
+                    this._mtProcessedBlocks.Count > 0)
+                {
                     throw new Exception("BZip2 dispose operation sanity check failed!...");
                 }
             }
 
             // finally, write the footer!
             this.WriteBz2FooterAndFlush();
-            
+
             //Console.WriteLine($"Max number of data pair entries was {this._debugMaxMetaBufferDataPairCount}");
         }
-        
+
         #region Implementation of abstract members of Stream
+
         #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        
+
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
-        protected override void Dispose(bool disposing) {
+        protected override void Dispose(bool disposing)
+        {
             this.FinishBitstream();
             base.Dispose(disposing);
-            if (this._isOwner) {
+            if (this._isOwner)
+            {
                 this._outputStream.Close();
             }
         }
-        
-        public override void Flush() {
+
+        public override void Flush()
+        {
             throw new NotSupportedException("BZip2ParallelOutputStream does not support 'Flush()' method! Just use 'Close()' instead.");
         }
-        public override long Seek(long offset, SeekOrigin origin) {
+        public override long Seek(long offset, SeekOrigin origin)
+        {
             throw new NotSupportedException("BZip2ParallelOutputStream does not support 'Seek(long offset, SeekOrigin origin)' method.");
         }
-        public override void SetLength(long value) {
+        public override void SetLength(long value)
+        {
             throw new NotSupportedException("BZip2ParallelOutputStream does not support 'SetLength(long value)' method.");
         }
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             throw new NotSupportedException("BZip2ParallelOutputStream does not support 'Read(byte[] buffer, int offset, int count)' method.");
         }
 
-        public override void WriteByte(byte value) {
-            if (!this._currentBlockBuffer.LoadByte(value)) {
+        public override void WriteByte(byte value)
+        {
+            if (!this._currentBlockBuffer.LoadByte(value))
+            {
                 // byte could not be loaded, this happens when current block buffer is full
-                
+
                 this.EnqueueCurrentBlockBuffer();
                 this._currentBlockBuffer.LoadByte(value);
-                
+
                 // try writing output block and keep doing so while successful
                 while (this.TryWriteOutputBlockAndIncrementId()) { }
             }
         }
 
-        public override void Write(byte[] data, int offset, int length) {
-            while (length > 0) {
-                if (!this._currentBlockBuffer.IsFull) {
+        public override void Write(byte[] data, int offset, int length)
+        {
+            while (length > 0)
+            {
+                if (!this._currentBlockBuffer.IsFull)
+                {
                     int count = this._currentBlockBuffer.LoadBytes(data, offset, length);
                     offset += count;
                     length -= count;
                 }
 
-                if (this._currentBlockBuffer.IsFull) {
+                if (this._currentBlockBuffer.IsFull)
+                {
                     this.EnqueueCurrentBlockBuffer();
                 }
-                
+
                 // try writing output block and keep doing so while successful
                 while (this.TryWriteOutputBlockAndIncrementId()) { }
             }
         }
 
-        public override bool CanRead {
+        public override bool CanRead
+        {
             get => false;
         }
-        public override bool CanSeek {
+        public override bool CanSeek
+        {
             get => false;
         }
-        public override bool CanWrite {
+        public override bool CanWrite
+        {
             get => this._outputStream.CanWrite;
         }
-        public override long Length {
+        public override long Length
+        {
             get => this._outputStream.Length;
         }
 
-        public override long Position {
+        public override long Position
+        {
             get => this._outputStream.Position;
             set => throw new NotSupportedException("BZip2ParallelOutputStream does not support Set operation for property 'Position'.");
         }
-                
-        
+
+
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
         #endregion
     }
 }
