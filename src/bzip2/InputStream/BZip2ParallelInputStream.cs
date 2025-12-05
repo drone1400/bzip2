@@ -21,9 +21,6 @@ namespace Bzip2.InputStream
         private int _mtNextInputBlockId = 0;
         private int _mtNextOutputBlockId = 0;
 
-        // flag indicating input stream is finished
-        private bool _mtStreamIsFinished = false;
-
         // yikes! sounds bad right?
         // if one of the worker threads, this is set to true and any further attempt to
         // write/flush/close the stream will throw an exception
@@ -34,7 +31,7 @@ namespace Bzip2.InputStream
         private readonly Dictionary<int, BZip2ParallelInputDataBlock> _mtDecodedBlocks = new Dictionary<int, BZip2ParallelInputDataBlock>();
 
         private int _mtPendingBlocks = 0;
-        private readonly int _mtMaxPendingBlocks = 1;
+        private readonly int _mtMaxPendingBlocks;
 
         private readonly int _mtWorkerBufferSize;
 
@@ -138,7 +135,6 @@ namespace Bzip2.InputStream
             
             if (this._inputStreamSplitter.IsStreamComplete)
             {
-                this._mtStreamIsFinished = true;
                 return false;
             }
 
