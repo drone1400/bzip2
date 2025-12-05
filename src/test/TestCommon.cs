@@ -47,7 +47,7 @@ namespace Bzip2.test
                 // compress input
                 Stopwatch swCMT = new Stopwatch();
                 swCMT.Start();
-                using BZip2ParallelOutputStream compressor = new BZip2ParallelOutputStream(output, threads, false, 9);
+                using BZip2ParallelOutputStream compressor = new BZip2ParallelOutputStream(output, false, 9);
                 inputStream.CopyTo(compressor, copyBufferSize);
                 compressor.Close();
                 swCMT.Stop();
