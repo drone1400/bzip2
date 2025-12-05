@@ -177,8 +177,8 @@ namespace Bzip2
                 uint marker2 = this.bitInputStream.ReadBits (8);
                 uint blockSize = (this.bitInputStream.ReadBits(8) - '0');
 
-                if ((!this.headerless && (marker1 != BZip2OutputStream.STREAM_START_MARKER_1))
-                    || (marker2 != BZip2OutputStream.STREAM_START_MARKER_2)
+                if ((!this.headerless && (marker1 != BZip2Constants.STREAM_START_MARKER_1))
+                    || (marker2 != BZip2Constants.STREAM_START_MARKER_2)
                     || (blockSize < 1) || (blockSize > 9))
                 {
                     throw new IOException("Invalid BZip2 header");
@@ -217,7 +217,7 @@ namespace Bzip2
             uint marker1 = this.bitInputStream.ReadBits(24);
             uint marker2 = this.bitInputStream.ReadBits(24);
 
-            if (marker1 == BZip2BlockCompressor.BLOCK_HEADER_MARKER_1 && marker2 == BZip2BlockCompressor.BLOCK_HEADER_MARKER_2)
+            if (marker1 == BZip2Constants.BLOCK_HEADER_MARKER_1 && marker2 == BZip2Constants.BLOCK_HEADER_MARKER_2)
             {
                 // Initialise a new block
                 try
@@ -231,7 +231,7 @@ namespace Bzip2
                 }
                 return true;
             }
-            if (marker1 == BZip2OutputStream.STREAM_END_MARKER_1 && marker2 == BZip2OutputStream.STREAM_END_MARKER_2)
+            if (marker1 == BZip2Constants.STREAM_END_MARKER_1 && marker2 == BZip2Constants.STREAM_END_MARKER_2)
             {
                 // Read and verify the end-of-stream CRC
                 this.streamComplete = true;

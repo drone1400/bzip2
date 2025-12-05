@@ -38,22 +38,6 @@ namespace Bzip2
 
         #endregion
 
-        #region internal fields
-
-        /// <summary>The first 2 bytes of a Bzip2 marker</summary> 
-        internal const uint STREAM_START_MARKER_1 = 0x425a;
-
-        /// <summary>The 'h' that distinguishes BZip from BZip2</summary> 
-        internal const uint STREAM_START_MARKER_2 = 0x68;
-
-        /// <summary>First three bytes of the end of stream marker</summary> 
-        internal const uint STREAM_END_MARKER_1 = 0x177245;
-
-        /// <summary>Last three bytes of the end of stream marker</summary> 
-        internal const uint STREAM_END_MARKER_2 = 0x385090;
-
-        #endregion
-
         #region Public methods
 
         /// <summary>Public constructor</summary>
@@ -76,8 +60,8 @@ namespace Bzip2
             this.bitOutputStream = new BZip2BitOutputStream(this.outputStream);
             this.isOwner = isOwner;
 
-            this.bitOutputStream.WriteBits(16, STREAM_START_MARKER_1);
-            this.bitOutputStream.WriteBits(8, STREAM_START_MARKER_2);
+            this.bitOutputStream.WriteBits(16, BZip2Constants.STREAM_START_MARKER_1);
+            this.bitOutputStream.WriteBits(8, BZip2Constants.STREAM_START_MARKER_2);
             this.bitOutputStream.WriteBits(8, (uint)('0' + blockSizeMultiplier));
 
             this.InitialiseNextBlock();
@@ -206,8 +190,8 @@ namespace Bzip2
                 try
                 {
                     this.CloseBlock();
-                    this.bitOutputStream.WriteBits(24, STREAM_END_MARKER_1);
-                    this.bitOutputStream.WriteBits(24, STREAM_END_MARKER_2);
+                    this.bitOutputStream.WriteBits(24, BZip2Constants.STREAM_END_MARKER_1);
+                    this.bitOutputStream.WriteBits(24, BZip2Constants.STREAM_END_MARKER_2);
                     this.bitOutputStream.WriteInteger(this.streamCRC);
                     this.bitOutputStream.Flush();
                     this.outputStream.Flush();

@@ -52,16 +52,6 @@ namespace Bzip2
 
         #endregion
 
-        #region internal fields
-
-        // First three bytes of the block header marker
-        internal const uint BLOCK_HEADER_MARKER_1 = 0x314159;
-
-        // Last three bytes of the block header marker
-        internal const uint BLOCK_HEADER_MARKER_2 = 0x265359;
-
-        #endregion
-
         #region Public properties
 
         /// <summary>
@@ -175,8 +165,8 @@ namespace Bzip2
             var bwtStartPointer = divSufSort.BWT();
 
             // Write out the block header
-            this.bitOutputStream.WriteBits(24, BLOCK_HEADER_MARKER_1);
-            this.bitOutputStream.WriteBits(24, BLOCK_HEADER_MARKER_2);
+            this.bitOutputStream.WriteBits(24, BZip2Constants.BLOCK_HEADER_MARKER_1);
+            this.bitOutputStream.WriteBits(24, BZip2Constants.BLOCK_HEADER_MARKER_2);
             this.bitOutputStream.WriteInteger(this.crc.CRC);
             this.bitOutputStream.WriteBoolean(false); // Randomised block flag. We never create randomised blocks
             this.bitOutputStream.WriteBits(24, (uint)bwtStartPointer);
