@@ -48,7 +48,7 @@ namespace Bzip2.InputStream
             {
                 this._crcValue = blockDecompressor.CheckCrc();
                 this._isCrcOk = true;
-            } catch (Exception ex)
+            } catch (Exception)
             {
                 this._crcValue = 0;
                 this._isCrcOk = false;
