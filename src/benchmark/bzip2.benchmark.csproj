@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+      <PackageReference Include="SharpCompress" Version="0.42.0" />
     </ItemGroup>
 
     <ItemGroup>

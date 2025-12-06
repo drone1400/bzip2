@@ -21,13 +21,6 @@ I used [BenchmarkDotNet](https://benchmarkdotnet.org/) for testing how well the 
 
 I'm mostly just using DMODs (Mods for an old game called Dink Smallwood that use bz2 compression) as test files for my benchmarks. 
 
-### Abbreviations
-
-* STC = Single Thread Compression
-* MTC = Multi Thread Compression
-* STD = Single Thread Decompression
-* MTD = Multi Thread Decompression
-
 ### Host info
 
 ```
@@ -44,33 +37,61 @@ BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6456/22H2/2022Update)
 
 Source file is `Version v2.01` of this DMOD: https://www.dinknetwork.com/file/friends_beyond_3_legend_of_tenjin/
 
-| Method | Job                  | Runtime              | Mean       | Error   | StdDev   | Ratio | RatioSD |
-|------- |--------------------- |--------------------- |-----------:|--------:|---------:|------:|--------:|
-| STC    | .NET 10.0            | .NET 10.0            | 1,105.5 ms | 5.61 ms |  4.97 ms |  0.88 |    0.00 |
-| STC    | .NET 8.0             | .NET 8.0             | 1,106.8 ms | 3.51 ms |  2.93 ms |  0.88 |    0.00 |
-| STC    | .NET Framework 4.7.2 | .NET Framework 4.7.2 | 1,272.8 ms | 2.52 ms |  2.36 ms |  1.01 |    0.00 |
-| STC    | .NET Framework 4.8   | .NET Framework 4.8   | 1,261.6 ms | 4.69 ms |  4.39 ms |  1.00 |    0.00 |
-|        |                      |                      |            |         |          |       |         |
-| MTC    | .NET 10.0            | .NET 10.0            |   345.8 ms | 6.77 ms |  7.53 ms |  0.82 |    0.03 |
-| MTC    | .NET 8.0             | .NET 8.0             |   340.3 ms | 6.73 ms | 10.87 ms |  0.81 |    0.03 |
-| MTC    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |   420.2 ms | 8.35 ms | 11.14 ms |  0.99 |    0.04 |
-| MTC    | .NET Framework 4.8   | .NET Framework 4.8   |   422.8 ms | 8.18 ms | 10.63 ms |  1.00 |    0.03 |
-|        |                      |                      |            |         |          |       |         |
-| STD    | .NET 10.0            | .NET 10.0            |   607.0 ms | 3.59 ms |  3.36 ms |  0.87 |    0.01 |
-| STD    | .NET 8.0             | .NET 8.0             |   629.1 ms | 6.19 ms |  5.79 ms |  0.90 |    0.01 |
-| STD    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |   694.5 ms | 1.92 ms |  1.71 ms |  1.00 |    0.01 |
-| STD    | .NET Framework 4.8   | .NET Framework 4.8   |   695.7 ms | 4.06 ms |  3.80 ms |  1.00 |    0.01 |
-|        |                      |                      |            |         |          |       |         |
-| MTD    | .NET 10.0            | .NET 10.0            |   153.6 ms | 2.95 ms |  2.62 ms |  0.73 |    0.02 |
-| MTD    | .NET 8.0             | .NET 8.0             |   163.7 ms | 3.25 ms |  4.44 ms |  0.78 |    0.02 |
-| MTD    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |   217.5 ms | 4.35 ms |  6.37 ms |  1.03 |    0.03 |
-| MTD    | .NET Framework 4.8   | .NET Framework 4.8   |   210.9 ms | 3.74 ms |  3.32 ms |  1.00 |    0.02 |
+### Abbreviations
 
-![](doc/benchmark-fb3.png)
+* CST = Single Thread Compression
+* CMT = Multi Thread Compression
+* DST = Single Thread Decompression
+* DMT = Multi Thread Decompression
+* CSC = Compression using [SharpCompress](https://github.com/adamhathcock/sharpcompress/) BZip2 implementation
+* DSC = Decompression using [SharpCompress](https://github.com/adamhathcock/sharpcompress/) BZip2 implementation
+
+| Method | Job                  | Runtime              | Mean       | Error    | StdDev   | Ratio | RatioSD |
+|------- |--------------------- |--------------------- |-----------:|---------:|---------:|------:|--------:|
+| CMT    | .NET 10.0            | .NET 10.0            |   325.2 ms |  6.32 ms |  6.21 ms |  0.78 |    0.02 |
+| CMT    | .NET 8.0             | .NET 8.0             |   337.2 ms |  6.59 ms |  6.76 ms |  0.81 |    0.02 |
+| CMT    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |   417.8 ms |  8.11 ms | 10.83 ms |  1.00 |    0.03 |
+| CMT    | .NET Framework 4.8   | .NET Framework 4.8   |   416.9 ms |  7.90 ms |  8.78 ms |  1.00 |    0.03 |
+|        |                      |                      |            |          |          |       |         |
+| CST    | .NET 10.0            | .NET 10.0            | 1,103.6 ms |  3.06 ms |  2.71 ms |  0.86 |    0.00 |
+| CST    | .NET 8.0             | .NET 8.0             | 1,110.5 ms |  5.08 ms |  4.75 ms |  0.87 |    0.01 |
+| CST    | .NET Framework 4.7.2 | .NET Framework 4.7.2 | 1,271.0 ms |  6.81 ms |  6.37 ms |  1.00 |    0.01 |
+| CST    | .NET Framework 4.8   | .NET Framework 4.8   | 1,276.6 ms |  7.38 ms |  6.55 ms |  1.00 |    0.01 |
+|        |                      |                      |            |          |          |       |         |
+| CSC    | .NET 10.0            | .NET 10.0            | 3,616.1 ms | 31.84 ms | 28.23 ms |  0.90 |    0.01 |
+| CSC    | .NET 8.0             | .NET 8.0             | 3,536.7 ms | 28.01 ms | 26.20 ms |  0.88 |    0.01 |
+| CSC    | .NET Framework 4.7.2 | .NET Framework 4.7.2 | 3,980.5 ms | 22.39 ms | 20.95 ms |  0.99 |    0.01 |
+| CSC    | .NET Framework 4.8   | .NET Framework 4.8   | 4,020.3 ms | 32.75 ms | 30.63 ms |  1.00 |    0.01 |
+|        |                      |                      |            |          |          |       |         |
+| DMT    | .NET 10.0            | .NET 10.0            |   158.8 ms |  3.11 ms |  4.65 ms |  0.73 |    0.03 |
+| DMT    | .NET 8.0             | .NET 8.0             |   159.4 ms |  3.16 ms |  4.63 ms |  0.73 |    0.03 |
+| DMT    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |   217.6 ms |  4.34 ms |  5.00 ms |  1.00 |    0.04 |
+| DMT    | .NET Framework 4.8   | .NET Framework 4.8   |   218.5 ms |  4.25 ms |  6.22 ms |  1.00 |    0.04 |
+|        |                      |                      |            |          |          |       |         |
+| DST    | .NET 10.0            | .NET 10.0            |   617.4 ms | 11.77 ms | 10.44 ms |  0.88 |    0.02 |
+| DST    | .NET 8.0             | .NET 8.0             |   626.4 ms |  5.23 ms |  4.63 ms |  0.90 |    0.01 |
+| DST    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |   700.6 ms |  7.01 ms |  6.56 ms |  1.00 |    0.01 |
+| DST    | .NET Framework 4.8   | .NET Framework 4.8   |   699.1 ms |  4.69 ms |  3.92 ms |  1.00 |    0.01 |
+|        |                      |                      |            |          |          |       |         |
+| DSC    | .NET 10.0            | .NET 10.0            |   622.6 ms | 11.53 ms | 11.84 ms |  0.60 |    0.01 |
+| DSC    | .NET 8.0             | .NET 8.0             |   651.1 ms |  8.20 ms |  7.67 ms |  0.63 |    0.01 |
+| DSC    | .NET Framework 4.7.2 | .NET Framework 4.7.2 | 1,044.9 ms | 16.67 ms | 15.60 ms |  1.01 |    0.02 |
+| DSC    | .NET Framework 4.8   | .NET Framework 4.8   | 1,036.7 ms | 17.73 ms | 16.59 ms |  1.00 |    0.02 |
+
+
+
+![](doc/benchmark-fb3-v2.png)
 
 ## DMOD - Necromancer
 
 Source file is `Version Demo v1.02` of this DMOD: https://www.dinknetwork.com/file/necromancer/
+
+### Abbreviations
+
+* STC = Single Thread Compression
+* MTC = Multi Thread Compression
+* STD = Single Thread Decompression
+* MTD = Multi Thread Decompression
 
 | Method | Job                  | Runtime              | Mean     | Error    | StdDev   | Ratio | RatioSD |
 |------- |--------------------- |--------------------- |---------:|---------:|---------:|------:|--------:|
