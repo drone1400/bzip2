@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bzip2", "src\bzip2\Bzip2.csproj", "{9B7BE1D0-9FBB-47F1-AB42-AE603C4AEB91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bzip2", "src\bzip2\bzip2.csproj", "{9B7BE1D0-9FBB-47F1-AB42-AE603C4AEB91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bzip2.test", "src\test\Bzip2.test.csproj", "{80DF094D-4B92-45F4-BB90-DAC6D0E4D24C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bzip2.test", "src\test\bzip2.test.csproj", "{80DF094D-4B92-45F4-BB90-DAC6D0E4D24C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bzip2.benchmark", "src\benchmark\bzip2.benchmark.csproj", "{CAFA44F7-1DDC-44E7-AB00-2DDD8CF9C07F}"
 EndProject
