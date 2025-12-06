@@ -33,7 +33,7 @@ namespace Bzip2.OutputStream
         private bool _isFull = false;
 
         /// <summary>
-        /// Block numeric id for distinguishing blocks 
+        /// Block numeric id for distinguishing blocks
         /// </summary>
         public int BlockId { get => this._blockId; }
         private int _blockId;
@@ -43,7 +43,7 @@ namespace Bzip2.OutputStream
         /// </summary>
         public int LoadedBytes { get => this._loadedBytes; }
         private int _loadedBytes = 0;
-        private BZip2BlockCompressor _compressor;
+        private readonly BZip2BlockCompressor _compressor;
 
         /// <summary>
         /// Public constructor
@@ -58,6 +58,12 @@ namespace Bzip2.OutputStream
             this._compressor = new BZip2BlockCompressor(this, blockSizeBytes);
         }
 
+        public void Dispose()
+        {
+            this._internalBitStream.Dispose();
+            this._buffer.Dispose();
+        }
+
         /// <summary>
         /// Loads a byte into the <see cref="BZip2BlockCompressor"/>'s first RLE stage
         /// </summary>
@@ -65,9 +71,6 @@ namespace Bzip2.OutputStream
         /// <returns>True if byte was loaded, false if byte could not be loaded because block compressor is full</returns>
         public bool LoadByte(byte value)
         {
-            if (this._compressor == null)
-                return false;
-
             if (this._compressor.Write(value))
             {
                 this._loadedBytes++;
@@ -89,9 +92,6 @@ namespace Bzip2.OutputStream
         /// <returns>Number of bytes actually loaded</returns>
         public int LoadBytes(byte[] buff, int offset, int length)
         {
-            if (this._compressor == null)
-                return 0;
-
             int count = this._compressor.Write(buff, offset, length);
             this._loadedBytes += count;
             if (count < length)
@@ -107,14 +107,8 @@ namespace Bzip2.OutputStream
         /// </summary>
         public void CompressBytes()
         {
-            if (this._compressor == null)
-                return;
-
             this._compressor.CloseBlock();
             this._blockCrc = this._compressor.CRC;
-
-            // set compressor to null so it can be garbage collected later
-            this._compressor = null;
         }
 
         /// <summary>
@@ -125,7 +119,7 @@ namespace Bzip2.OutputStream
         public void WriteToRealOutputStream(BZip2BitOutputStream stream)
         {
             this._internalBitStream.Flush();
-            
+
             this._buffer.Position = 0;
             while (this._bitCount >= 8)
             {

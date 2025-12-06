@@ -12,49 +12,35 @@ namespace Bzip2.InputStream
     /// The spitting is done by looking for the magic block header 6 byte sequence.
     /// The output MemoryStreams bits are left aligned.
     /// </summary>
-    internal class BZip2BitInputStreamSplitter
+    internal class BZip2BitInputStreamSplitter : IDisposable
     {
 
         // The stream from which bits are read
-        private readonly BZip2BitInputStream _bitInputStream;
+        private BZip2BitInputStream? _bitInputStream;
 
         // internal temporary buffer
-        private MemoryStream _buffer = null;
+        private MemoryStream? _buffer = null;
 
-        private bool _isStreamComplete = false;
         private int _blockLevel = 0;
         private int _blockSizeBytes = 0;
         private uint _finalCrc = 0;
         private ulong _crtVal = 0x00;
         private int _bitCount = 0;
 
-        public bool IsStreamComplete => this._isStreamComplete;
+        public bool IsStreamComplete => this._bitInputStream is null;
         public int BlockLevel => this._blockLevel;
         public int BlockSizeBytes => this._blockSizeBytes;
         public uint FinalCrc => this._finalCrc;
 
         public BZip2BitInputStreamSplitter(Stream inputStream, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9)
         {
-
-            if (inputStream == null)
-            {
-                throw new ArgumentException("Null input stream");
-            }
-
             this._bitInputStream = new  BZip2BitInputStream(inputStream);
-
-
             this.Initialize(inputStreamHeaderCheck, manualBlockLevel);
         }
 
         private void Initialize(InputStreamHeaderCheckType inputStreamHeaderCheck, int blockLevel)
         {
-            // If the stream has been explicitly closed, throw an exception
-            if (this._bitInputStream == null)
-                throw new IOException("Stream closed");
-
-            // If we're already at the end of the stream, do nothing
-            if (this._isStreamComplete)
+            if (this._bitInputStream is null)
                 return;
 
             /* Read the stream header */
@@ -114,7 +100,8 @@ namespace Bzip2.InputStream
             } catch (IOException)
             {
                 // If the stream header was not valid, stop trying to read more data
-                this._isStreamComplete = true;
+                this._bitInputStream = null;
+                this._buffer = null;
                 throw;
             }
         }
@@ -123,7 +110,7 @@ namespace Bzip2.InputStream
         /// Finds the next BZip2 block and returns an in memory copy of it
         /// </summary>
         /// <returns>MemoryStream</returns>
-        public MemoryStream CopyNextBlock()
+        public MemoryStream? CopyNextBlock()
         {
             void FlushByte()
             {
@@ -141,6 +128,9 @@ namespace Bzip2.InputStream
                 this._crtVal &= 0x0000FFFF_FFFFFFFF;
                 this._bitCount = 0;
             }
+
+            if (this._bitInputStream is null || this._buffer is null)
+                return null;
 
             while (true)
             {
@@ -161,12 +151,14 @@ namespace Bzip2.InputStream
                         FlushPartialByte();
                     }
 
-                    // read the 32 bit CRC at the end of the file 
+                    // read the 32 bit CRC at the end of the file
                     this._finalCrc = this._bitInputStream.ReadInteger();
 
                     MemoryStream retBuffer = this._buffer;
+
+                    // clear buffer and input stream to mark that we are done processing blocks for good
                     this._buffer = null;
-                    this._isStreamComplete = true;
+                    this._bitInputStream = null;
                     return retBuffer;
                 }
 
@@ -182,6 +174,11 @@ namespace Bzip2.InputStream
                     return retBuffer;
                 }
             }
+        }
+        public void Dispose()
+        {
+            this._bitInputStream?.Dispose();
+            this._buffer?.Dispose();
         }
     }
 }

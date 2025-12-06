@@ -22,7 +22,7 @@
       <_Parameter1>Bzip2.test</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-  
+
   <PropertyGroup>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -32,6 +32,8 @@
     <IntermediateOutputPath>..\..\output.obj\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</IntermediateOutputPath>
     <OutputPath>..\..\output\$(TargetFramework)_$(Configuration)_$(Platform)\bzip2\</OutputPath>
     <WarningLevel>4</WarningLevel>
+    <Nullable>enable</Nullable>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

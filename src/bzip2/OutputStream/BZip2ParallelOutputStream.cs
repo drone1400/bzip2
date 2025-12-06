@@ -26,13 +26,13 @@ namespace Bzip2.OutputStream
         // if one of the worker threads, this is set to true and any furhter attempt to
         // write/flush/close the stream will throw an exception
         private bool _unsafeFatalException = false;
-        private Exception _lastWorkerException = null;
+        private Exception? _lastWorkerException = null;
 
         // dictionary of processed blocks
         private readonly Dictionary<int, BZip2ParallelOutputDataBlock> _mtProcessedBlocks = new Dictionary<int, BZip2ParallelOutputDataBlock>();
 
         private int _mtPendingBlocks = 0;
-        
+
         private readonly object _syncRootProcesing = new object();
         private readonly object _syncRootOutputStream = new object();
 
@@ -46,7 +46,7 @@ namespace Bzip2.OutputStream
         private uint _streamCrc = 0;
 
         //
-        private BZip2ParallelOutputDataBlock _currentBlockBuffer = null;
+        private BZip2ParallelOutputDataBlock _currentBlockBuffer;
 
         // True if the underlying stream will be closed with the current Stream
         private readonly bool _isOwner;
@@ -102,7 +102,7 @@ namespace Bzip2.OutputStream
 
             try
             {
-                BZip2ParallelOutputDataBlock currentOutput = null;
+                BZip2ParallelOutputDataBlock? currentOutput = null;
 
                 lock (this._syncRootProcesing)
                 {
@@ -112,9 +112,9 @@ namespace Bzip2.OutputStream
                         currentOutput = this._mtProcessedBlocks[this._mtNextOutputBlockId];
                         this._mtProcessedBlocks.Remove(this._mtNextOutputBlockId);
                     }
-                    
+
                     // check if we got anything to write
-                    if (currentOutput == null) 
+                    if (currentOutput is null)
                         return false;
 
                     this._mtNextOutputBlockId++;
@@ -139,11 +139,11 @@ namespace Bzip2.OutputStream
         }
 
         /// <summary>
-        /// Compresses a block of data 
+        /// Compresses a block of data
         /// </summary>
         /// <param name="blockData"><see cref="BZip2ParallelOutputDataBlock"/></param>
         /// <exception cref="IOException">if compressing the block somehow fails...</exception>
-        private void MultiThreadWorkerAction(object blockData)
+        private void MultiThreadWorkerAction(object? blockData)
         {
             try
             {
@@ -225,7 +225,7 @@ namespace Bzip2.OutputStream
             {
                 throw new IOException("One of the compression threads somehow failed... This should never happen.", this._lastWorkerException);
             }
-            
+
             // make sure current block has data
             if (this._currentBlockBuffer.LoadedBytes <= 0)
                 return false;
@@ -251,7 +251,7 @@ namespace Bzip2.OutputStream
             {
                 throw new IOException("One of the compression threads somehow failed... This should never happen.", this._lastWorkerException);
             }
-            
+
             lock (this._syncRootProcesing)
             {
                 if (this._mtStreamIsFinished) return;
@@ -270,7 +270,7 @@ namespace Bzip2.OutputStream
                 {
                     throw new IOException("One of the compression threads somehow failed... This should never happen.", this._lastWorkerException);
                 }
-                
+
                 lock (this._syncRootProcesing)
                 {
                     if (this._mtNextInputBlockId == this._mtNextOutputBlockId)
@@ -279,9 +279,9 @@ namespace Bzip2.OutputStream
                         break;
                     }
                 }
-                
+
                 // try writing output block and keep doing so while successful
-                while (this.TryWriteOutputBlockAndIncrementId()) 
+                while (this.TryWriteOutputBlockAndIncrementId())
                 { }
                 Thread.Sleep(1);
             }
@@ -320,7 +320,7 @@ namespace Bzip2.OutputStream
         public override void Flush()
         {
             // try writing output block and keep doing so while successful
-            while (this.TryWriteOutputBlockAndIncrementId()) 
+            while (this.TryWriteOutputBlockAndIncrementId())
             { }
         }
         public override long Seek(long offset, SeekOrigin origin)

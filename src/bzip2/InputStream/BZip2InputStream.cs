@@ -16,7 +16,7 @@ namespace Bzip2.InputStream
     {
         // The stream from which compressed BZip2 data is read and decoded
         private Stream _inputStream;
-        
+
         // True if the underlying stream will be closed with the current Stream
         private readonly bool _isOwner;
 
@@ -39,9 +39,9 @@ namespace Bzip2.InputStream
         private uint _streamCrc;
 
         // The decompressor for the current block
-        private BZip2BlockDecompressor _blockDecompressor;
-        
-        
+        private BZip2BlockDecompressor? _blockDecompressor;
+
+
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The InputStream to wrap</param>
         /// <param name="isOwner">if true, will close the stream when done</param>
@@ -49,7 +49,7 @@ namespace Bzip2.InputStream
         /// <param name="manualBlockLevel">Used when <see cref="inputStreamHeaderCheck"/> is NoHeader</param>
         public BZip2InputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9)
         {
-            this._inputStream = inputStream ?? throw new ArgumentException("Null input stream");
+            this._inputStream = inputStream;
             this._bitInputStream = new BZip2BitInputStream(inputStream);
             this._isOwner = isOwner;
 
@@ -78,42 +78,42 @@ namespace Bzip2.InputStream
         {
             throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Write(byte[] buffer, int offset, int count)' method.");
         }
-        public override bool CanRead => this._inputStream.CanRead;
+        public override bool CanRead => this._inputStream?.CanRead ?? false;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length => this._inputStream.Length;
+        public override long Length => this._inputStream?.Length ?? 0;
         public override long Position
         {
-            get => this._inputStream.Position;
+            get => this._inputStream?.Position ?? 0;
             set =>throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support Set operation for property 'Position'.");
         }
 
-        public override int ReadByte() 
+        public override int ReadByte()
         {
-            var nextByte = this._blockDecompressor.Read();
-            
+            var nextByte = this._blockDecompressor?.Read() ?? -1;
+
             // if current block has reached its end, prepare next block and try reading again
-            if (nextByte == -1) 
+            if (nextByte == -1)
             {
-                if (this.InitializeNextBlock()) 
+                if (this.InitializeNextBlock())
                 {
-                    nextByte = this._blockDecompressor.Read();
+                    nextByte = this._blockDecompressor?.Read() ?? -1;
                 }
             }
 
             return nextByte;
         }
 
-        public override int Read(byte[] destination,  int offset,  int length) 
+        public override int Read(byte[] destination,  int offset,  int length)
         {
-            int bytesRead = this._blockDecompressor.Read(destination, offset, length);
+            int bytesRead = this._blockDecompressor?.Read(destination, offset, length) ?? 0;
 
             // if current block has reached its end, prepare next block and try reading again
-            if (bytesRead == -1) 
+            if (bytesRead == -1)
             {
-                if (this.InitializeNextBlock()) 
+                if (this.InitializeNextBlock())
                 {
-                    bytesRead = this._blockDecompressor.Read(destination, offset, length);
+                    bytesRead = this._blockDecompressor?.Read(destination, offset, length) ?? 0;
                 }
             }
 
@@ -125,22 +125,15 @@ namespace Bzip2.InputStream
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
         protected override void Dispose(bool disposing)
         {
-            if (this._bitInputStream == null)
-                return;
-
             this._streamComplete = true;
             this._blockDecompressor = null;
-            this._bitInputStream = null;
 
-            try
+            this._bitInputStream.Dispose();
+
+            if (this._isOwner)
             {
-                if (this._isOwner)
-                {
-                    this._inputStream.Close();
-                }
-            } finally
-            {
-                this._inputStream = null;
+                //this._inputStream.Close();
+                this._inputStream.Dispose();
             }
         }
 
@@ -150,10 +143,10 @@ namespace Bzip2.InputStream
 
         /// <summary>Reads the stream header and checks that the data appears to be a valid BZip2 stream</summary>
         /// <exception cref="IOException">if the stream header is not valid</exception>
-        private void InitializeStream(InputStreamHeaderCheckType inputStreamHeaderCheck, int blockLevel) 
+        private void InitializeStream(InputStreamHeaderCheckType inputStreamHeaderCheck, int blockLevel)
         {
             /* If the stream has been explicitly closed, throw an exception */
-            if (this._bitInputStream == null)
+            if (this._bitInputStream is null)
                 throw new IOException("Stream closed");
 
             // If we're already at the end of the stream, do nothing

@@ -13,7 +13,7 @@ namespace Bzip2.InputStream
     internal class BZip2BitInputStream : IBZip2BitInputStream
     {
         // The stream from which bits are read
-        private readonly Stream _inputStream;
+        private Stream _inputStream;
 
         // A buffer of bits read from the input stream that have not yet been returned
         private uint _bitBuffer;
@@ -26,6 +26,11 @@ namespace Bzip2.InputStream
         public BZip2BitInputStream(Stream inputStream)
         {
             this._inputStream = inputStream;
+        }
+
+        public void Dispose()
+        {
+            // do nothing, the BZip2BitInputStream is not the owner of the _inputStream so don't dispose it
         }
 
         /// <summary>Reads a single bit from the wrapped input stream</summary>

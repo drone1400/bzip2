@@ -1,7 +1,8 @@
+using System;
 using System.IO;
 namespace Bzip2.Interface
 {
-    public interface IBZip2BitInputStream
+    public interface IBZip2BitInputStream : IDisposable
     {
         /// <summary>Reads a single bit from the wrapped input stream</summary>
         /// <return>true if the bit read was 1, otherwise false</return>

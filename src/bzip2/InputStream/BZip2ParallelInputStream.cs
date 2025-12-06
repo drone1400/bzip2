@@ -25,7 +25,7 @@ namespace Bzip2.InputStream
         // if one of the worker threads, this is set to true and any further attempt to
         // write/flush/close the stream will throw an exception
         private bool _unsafeFatalException = false;
-        private Exception _lastWorkerException = null;
+        private Exception? _lastWorkerException = null;
 
         // dictionary of processed blocks
         private readonly Dictionary<int, BZip2ParallelInputDataBlock> _mtDecodedBlocks = new Dictionary<int, BZip2ParallelInputDataBlock>();
@@ -61,14 +61,9 @@ namespace Bzip2.InputStream
         /// <param name="inputStreamHeaderCheck"><see cref="InputStreamHeaderCheckType"/></param>
         /// <param name="manualBlockLevel">Used when <see cref="inputStreamHeaderCheck"/> is NoHeader</param>
         /// <param name="maxPendingBlocks">Maximum number of blocks to read/decompress at the same time</param>
-        /// <param name="workerBufferSize">Minimum buffer size for each worker thread during decompression, in bytes.</param> 
+        /// <param name="workerBufferSize">Minimum buffer size for each worker thread during decompression, in bytes.</param>
         public BZip2ParallelInputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9, int maxPendingBlocks = 0, int workerBufferSize = 12582912)
         {
-            if (inputStream == null)
-            {
-                throw new ArgumentException("Null input stream");
-            }
-
             if (maxPendingBlocks == 0) maxPendingBlocks = Environment.ProcessorCount;
             this._mtMaxPendingBlocks = maxPendingBlocks;
             this._mtWorkerBufferSize = workerBufferSize;
@@ -85,11 +80,11 @@ namespace Bzip2.InputStream
         #endregion
 
         /// <summary>
-        /// Decompress a block of data 
+        /// Decompress a block of data
         /// </summary>
         /// <param name="blockData"><see cref="BZip2ParallelInputDataBlock"/></param>
         /// <exception cref="IOException">if compressing the block somehow fails...</exception>
-        private void MultiThreadWorkerAction(object blockData)
+        private void MultiThreadWorkerAction(object? blockData)
         {
             try
             {
@@ -132,7 +127,7 @@ namespace Bzip2.InputStream
             {
                 throw new IOException("One of the decompression threads somehow failed... This should never happen.", this._lastWorkerException);
             }
-            
+
             if (this._inputStreamSplitter.IsStreamComplete)
             {
                 return false;
@@ -145,7 +140,11 @@ namespace Bzip2.InputStream
             }
 
             // extract the next block...
-            MemoryStream ms = this._inputStreamSplitter.CopyNextBlock();
+            MemoryStream? ms = this._inputStreamSplitter.CopyNextBlock();
+
+            // this should be impossible if this._inputStreamSplitter.IsStreamComplete is not true
+            if (ms is null)
+                return false;
 
             lock (this._syncRootProcesing)
             {
@@ -170,7 +169,7 @@ namespace Bzip2.InputStream
             {
                 throw new IOException("One of the decompression threads somehow failed... This should never happen.", this._lastWorkerException);
             }
-            
+
             lock (this._syncRootProcesing)
             {
                 if (this._mtPendingBlocks == 0 &&
@@ -226,7 +225,7 @@ namespace Bzip2.InputStream
             while (true)
             {
                 // check if the next output block is done
-                BZip2ParallelInputDataBlock data = null;
+                BZip2ParallelInputDataBlock? data = null;
                 lock (this._syncRootProcesing)
                 {
                     if (this._mtDecodedBlocks.ContainsKey(this._mtNextOutputBlockId))
@@ -283,7 +282,7 @@ namespace Bzip2.InputStream
             while (true)
             {
                 // check if the next output block is done
-                BZip2ParallelInputDataBlock data = null;
+                BZip2ParallelInputDataBlock? data = null;
                 lock (this._syncRootProcesing)
                 {
                     if (this._mtDecodedBlocks.ContainsKey(this._mtNextOutputBlockId))
@@ -340,20 +339,12 @@ namespace Bzip2.InputStream
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
         protected override void Dispose(bool disposing)
         {
-            if (this._inputStream == null)
-                return;
-
             this._mtDecodedBlocks.Clear();
 
-            try
+            if (this._isOwner)
             {
-                if (this._isOwner)
-                {
-                    this._inputStream.Close();
-                }
-            } finally
-            {
-                this._inputStream = null;
+                //this._inputStream.Close();
+                this._inputStream.Dispose();
             }
         }
 

@@ -7,7 +7,7 @@ namespace Bzip2.Interface
     /// <summary>
     /// Interface for a stream wrapper that implements bit-wise write operations
     /// </summary>
-    internal interface IBZip2BitOutputStream
+    internal interface IBZip2BitOutputStream : IDisposable
     {
         /// <summary>
         /// Writes a single bit to the wrapped output stream

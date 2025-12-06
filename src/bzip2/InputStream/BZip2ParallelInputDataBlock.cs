@@ -3,18 +3,19 @@ using System.IO;
 using Bzip2.Algorithm;
 namespace Bzip2.InputStream
 {
-    public class BZip2ParallelInputDataBlock
+    public class BZip2ParallelInputDataBlock : IDisposable
     {
 
         private int _blockId = 0;
-        private MemoryStream _inputBlockBuffer;
-        private MemoryStream _outputBuffer;
+        private MemoryStream? _inputBlockBuffer;
+        private MemoryStream? _outputBuffer;
+        private int _outputBufferSize;
         private int _blockSizeBytes;
         private bool _isCrcOk = false;
         private uint _crcValue;
 
-        public long Length => this._outputBuffer.Length;
-        public long Position => this._outputBuffer.Position;
+        public long Length => this._outputBuffer?.Length ?? 0;
+        public long Position => this._outputBuffer?.Position ?? 0;
         public bool IsDone => this.Position >= this.Length;
         public int BlockId => this._blockId;
         public bool IsCrcOk => this._isCrcOk;
@@ -25,7 +26,13 @@ namespace Bzip2.InputStream
             this._blockId = blockId;
             this._inputBlockBuffer = inputBlockBuffer;
             this._blockSizeBytes = blockSizeBytes;
-            this._outputBuffer = new MemoryStream(outputBufferSize);
+            this._outputBufferSize = outputBufferSize;
+        }
+
+        public void Dispose()
+        {
+            this._inputBlockBuffer?.Dispose();
+            this._outputBuffer?.Dispose();
         }
 
 
@@ -34,9 +41,14 @@ namespace Bzip2.InputStream
         /// </summary>
         public void Decompress()
         {
+            if (this._inputBlockBuffer is null)
+                throw new IOException("Attempted to Decompress the same block twice");
+
+            this._outputBuffer = new MemoryStream(this._outputBufferSize);
+
             // note: we need to skip the first 6 magic bytes...
             this._inputBlockBuffer.Position = 6;
-            BZip2BitInputStream inputStream = new BZip2BitInputStream(this._inputBlockBuffer);
+            using BZip2BitInputStream inputStream = new BZip2BitInputStream(this._inputBlockBuffer);
             BZip2BlockDecompressor blockDecompressor = new BZip2BlockDecompressor(inputStream, (uint)this._blockSizeBytes);
 
             int readCount = blockDecompressor.ReadAll(this._outputBuffer);
@@ -64,6 +76,9 @@ namespace Bzip2.InputStream
         /// <returns></returns>
         public int Read()
         {
+            if (this._outputBuffer is null)
+                throw new IOException("Attempted to read decompressed data before decompressing block");
+
             if (this._isCrcOk == false)
                 return -1;
             if (this._outputBuffer.Position < this._outputBuffer.Length)
@@ -80,6 +95,9 @@ namespace Bzip2.InputStream
         /// <returns></returns>
         public int Read(byte[] destination, int offset, int length)
         {
+            if (this._outputBuffer is null)
+                throw new IOException("Attempted to read decompressed data before decompressing block");
+
             if (this._isCrcOk == false)
                 return 0;
 

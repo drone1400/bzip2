@@ -31,11 +31,11 @@ namespace Bzip2.OutputStream
         private uint _streamCrc;
 
         // The compressor for the current block
-        private BZip2BlockCompressor _blockCompressor;
+        private BZip2BlockCompressor? _blockCompressor;
 
         // True if the underlying stream will be closed with the current Stream
         private bool _isOwner;
-        
+
         /// <summary>Public constructor</summary>
         /// <param name="outputStream">The output stream to write to</param>
         /// <param name="blockSizeMultiplier">The BZip2 block size as a multiple of 100,000 bytes (minimum 1, maximum 9)</param>
@@ -45,7 +45,7 @@ namespace Bzip2.OutputStream
         /// but give better compression ratios. 9 will usually be the best value to use</remarks>
         public BZip2OutputStream(Stream outputStream, bool isOwner = true, int blockSizeMultiplier = 9)
         {
-            if (outputStream == null)
+            if (outputStream is null)
                 throw new ArgumentException("Null output stream");
 
             if ((blockSizeMultiplier < 1) || (blockSizeMultiplier > 9))
@@ -102,10 +102,10 @@ namespace Bzip2.OutputStream
 
         public override void WriteByte(byte value)
         {
-            if (this._outputStream == null)
+            if (this._outputStream is null)
                 throw new IOException("Stream closed");
 
-            if (this._streamFinished)
+            if (this._blockCompressor is null || this._streamFinished)
                 throw new IOException("Write beyond end of stream");
 
             if (!this._blockCompressor.Write(value & 0xff))
@@ -118,10 +118,10 @@ namespace Bzip2.OutputStream
 
         public override void Write(byte[] data, int offset, int length)
         {
-            if (this._outputStream == null)
+            if (this._outputStream is null)
                 throw new IOException("Stream closed");
 
-            if (this._streamFinished)
+            if (this._blockCompressor is null || this._streamFinished)
                 throw new IOException("Write beyond end of stream");
 
             while (length > 0)
@@ -140,20 +140,18 @@ namespace Bzip2.OutputStream
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
         protected override void Dispose(bool disposing)
         {
-            if (this._outputStream != null)
+            this.Finish();
+            if (this._isOwner)
             {
-                this.Finish();
-                if (this._isOwner)
-                    this._outputStream.Close();
-                this._outputStream = null;
+                this._outputStream.Dispose();
             }
         }
 
         #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         #endregion
-        
-        /// <summary>Initialises a new block for compression</summary> 
+
+        /// <summary>Initialises a new block for compression</summary>
         private void InitialiseNextBlock()
         {
             this._blockCompressor = new BZip2BlockCompressor (this._bitOutputStream, this._streamBlockSize);
@@ -164,7 +162,7 @@ namespace Bzip2.OutputStream
         /// <exception>On any I/O error writing to the output stream</exception>
         private void CloseBlock()
         {
-            if (this._blockCompressor.IsEmpty)
+            if (this._blockCompressor is null || this._blockCompressor.IsEmpty)
                 return;
 
             this._blockCompressor.CloseBlock();

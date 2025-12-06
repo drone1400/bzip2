@@ -4,6 +4,7 @@
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
 // Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
+using System;
 using System.IO;
 using Bzip2.Interface;
 namespace Bzip2.OutputStream
@@ -19,7 +20,7 @@ namespace Bzip2.OutputStream
         // The stream to which bits are written
         private readonly Stream _outputStream;
 
-        // A buffer of bits waiting to be written to the output stream	 
+        // A buffer of bits waiting to be written to the output stream
         private uint _bitBuffer;
 
         // The number of bits currently buffered in bitBuffer
@@ -32,6 +33,11 @@ namespace Bzip2.OutputStream
         public BZip2BitOutputStream(Stream outputStream)
         {
             this._outputStream = outputStream;
+        }
+
+        public void Dispose()
+        {
+            // do nothing, the BZip2BitOutputStream is not the owner of the _outputStream so don't dispose it
         }
 
         #region IBZip2BitOutputStream implementation

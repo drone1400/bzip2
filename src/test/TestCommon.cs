@@ -34,13 +34,13 @@ namespace Bzip2.test
                 fs.Flush();
                 fs.Close();
             }
-            
+
             double timeCompress = 0;
             double timeDecompress = 0;
-            
+
             using MemoryStream output = new MemoryStream(outputBufferSize);
             using MemoryStream outputDecompressed = new MemoryStream(outputBufferSize);
-            
+
             try
             {
                 // compress input
@@ -57,7 +57,7 @@ namespace Bzip2.test
 
                 // reset output position
                 output.Position = 0;
-                
+
                 // decompress output
                 Stopwatch SwDecompress = new Stopwatch();
                 SwDecompress.Start();
@@ -74,7 +74,7 @@ namespace Bzip2.test
                 {
                     DebugSaveInputStream();
                 }
-                
+
                 Assert.Fail($"Exception was thrown... {ex}");
             }
 
@@ -82,10 +82,10 @@ namespace Bzip2.test
             {
                 Assert.Fail($"Decompressed stream length mismatch, expecting {inputStream.Length}, got {outputDecompressed.Length}");
             }
-            
+
             inputStream.Position = 0;
             outputDecompressed.Position = 0;
-            
+
             for (int i = 0; i < inputStream.Length; i++)
             {
                 int expect = inputStream.ReadByte();
@@ -117,7 +117,7 @@ namespace Bzip2.test
             CMT_DMT, // multi thread compress, multi thread decompress (TODO)
             CST_DMT, // single thread compress, multi thread decompress (TODO)
         }
-        
+
         public static void RandomLongTest_X(ITestOutputHelper console, int repeat, RandomDataMode dataMode, TestMode testMode, int len = 9000000)
         {
             Random random = new Random();
@@ -128,7 +128,7 @@ namespace Bzip2.test
 
             double totalCompressionTimeMs = 0;
             double totalDecompressionTimeMs = 0;
-            
+
             for (int r = 0; r < repeat; r++)
             {
                 byte[] bigBuffer = new byte[len];
@@ -167,12 +167,12 @@ namespace Bzip2.test
                         break;
                     }
                 }
-                
+
                 MemoryStream ms = new MemoryStream(bigBuffer);
                 double timeC = 0, timeD = 0;
                 switch (testMode)
                 {
-                    default: throw new Exception("Unknown test mode");
+                    default: throw new ArgumentException("Unknown test mode");
                     case TestMode.CMT_DMT:
                     {
                         (timeC, timeD) = GenericTest(console, ms, true, true, outBufferSize, copyBufferSize, true);

@@ -125,7 +125,7 @@ namespace Bzip2.Algorithm
         /// when both pieces of information are available, saves a large number of memory accesses in
         /// the final decoding stages.
         /// </summary>
-        private int[] bwtMergedPointers;
+        private int[] bwtMergedPointers = Array.Empty<int>();
 
         // The current merged pointer into the Burrow-Wheeler Transform array
         private int bwtCurrentMergedPointer;
@@ -323,7 +323,7 @@ namespace Bzip2.Algorithm
                 _bwtMergedPointers[characterBase[value]++] = (i << 8) + value;
             }
 
-            this.bwtBlock = null;
+            //this.bwtBlock = null;
             this.bwtMergedPointers = _bwtMergedPointers;
             this.bwtCurrentMergedPointer = _bwtMergedPointers[bwtStartPointer];
         }
@@ -439,7 +439,7 @@ namespace Bzip2.Algorithm
             }
             return i;
         }
-        
+
         public int Read(Stream x, int maxLength)
         {
             int i;
@@ -453,7 +453,7 @@ namespace Bzip2.Algorithm
             }
             return i;
         }
-        
+
         public int ReadAll(Stream x)
         {
             int count = 0;
@@ -466,7 +466,7 @@ namespace Bzip2.Algorithm
                 x.WriteByte((byte)decoded);
             }
         }
-        
+
         /// <summary>
         /// Verify and return the block CRC. This method may only be called after all of the block's bytes have been read
         /// </summary>
