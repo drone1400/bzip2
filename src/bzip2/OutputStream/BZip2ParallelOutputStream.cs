@@ -254,7 +254,8 @@ namespace Bzip2.OutputStream
 
             lock (this._syncRootProcesing)
             {
-                if (this._mtStreamIsFinished) return;
+                if (this._mtStreamIsFinished)
+                    return;
                 this._mtStreamIsFinished = true;
             }
 
@@ -323,18 +324,9 @@ namespace Bzip2.OutputStream
             while (this.TryWriteOutputBlockAndIncrementId())
             { }
         }
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
-        }
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'SetLength(long value)' method.");
-        }
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Read(byte[] buffer, int offset, int count)' method.");
-        }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
+        public override void SetLength(long value) => throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'SetLength(long value)' method.");
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException($"{nameof(BZip2ParallelOutputStream)} does not support 'Read(byte[] buffer, int offset, int count)' method.");
 
         public override void WriteByte(byte value)
         {

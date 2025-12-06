@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <None Include="..\..\.gitignore" LinkBase=".metadata" />
+    <None Include="..\..\.editorconfig" LinkBase=".metadata" />
     <None Include="..\..\LICENSE" LinkBase=".metadata" />
     <None Include="..\..\README.md" LinkBase=".metadata" />
     <None Include="..\..\CHANGELOG" LinkBase=".metadata" />

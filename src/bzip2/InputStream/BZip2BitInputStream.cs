@@ -23,10 +23,7 @@ namespace Bzip2.InputStream
 
         /// <summary>Public constructor</summary>
         /// <param name="inputStream">The input stream to wrap</param>
-        public BZip2BitInputStream(Stream inputStream)
-        {
-            this._inputStream = inputStream;
-        }
+        public BZip2BitInputStream(Stream inputStream) => this._inputStream = inputStream;
 
         public void Dispose()
         {
@@ -109,9 +106,6 @@ namespace Bzip2.InputStream
         /// <summary>Reads 32 bits of input as an integer</summary>
         /// <return>The integer read</return>
         /// <exception cref="IOException">if 32 bits are not available in the input stream</exception>
-        public uint ReadInteger()
-        {
-            return (this.ReadBits(16) << 16) | (this.ReadBits(16));
-        }
+        public uint ReadInteger() => (this.ReadBits(16) << 16) | (this.ReadBits(16));
     }
 }

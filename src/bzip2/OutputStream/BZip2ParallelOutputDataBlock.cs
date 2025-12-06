@@ -23,25 +23,25 @@ namespace Bzip2.OutputStream
         /// <summary>
         /// Compressed block CRC to be stored here when block is finished
         /// </summary>
-        public uint BlockCrc { get => this._blockCrc; }
+        public uint BlockCrc => this._blockCrc;
         private uint _blockCrc = 0;
 
         /// <summary>
         /// Indicates that the compression block is full
         /// </summary>
-        public bool IsFull { get => this._isFull; }
+        public bool IsFull => this._isFull;
         private bool _isFull = false;
 
         /// <summary>
         /// Block numeric id for distinguishing blocks
         /// </summary>
-        public int BlockId { get => this._blockId; }
+        public int BlockId => this._blockId;
         private int _blockId;
 
         /// <summary>
         /// Number of bytes loaded into the block compressor
         /// </summary>
-        public int LoadedBytes { get => this._loadedBytes; }
+        public int LoadedBytes => this._loadedBytes;
         private int _loadedBytes = 0;
         private readonly BZip2BlockCompressor _compressor;
 
@@ -164,10 +164,7 @@ namespace Bzip2.OutputStream
             this._bitCount += 32;
             this._internalBitStream.WriteInteger(value);
         }
-        public void Flush()
-        {
-            this._internalBitStream.Flush();
-        }
+        public void Flush() => this._internalBitStream.Flush();
 
         #endregion
     }

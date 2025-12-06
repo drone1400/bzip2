@@ -62,9 +62,12 @@ namespace Bzip2.InputStream
         /// <param name="manualBlockLevel">Used when <see cref="inputStreamHeaderCheck"/> is NoHeader</param>
         /// <param name="maxPendingBlocks">Maximum number of blocks to read/decompress at the same time</param>
         /// <param name="workerBufferSize">Minimum buffer size for each worker thread during decompression, in bytes.</param>
-        public BZip2ParallelInputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9, int maxPendingBlocks = 0, int workerBufferSize = 12582912)
+        public BZip2ParallelInputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FULL_HEADER, int manualBlockLevel = 9, int maxPendingBlocks = 0, int workerBufferSize = 12582912)
         {
-            if (maxPendingBlocks == 0) maxPendingBlocks = Environment.ProcessorCount;
+            if (maxPendingBlocks == 0)
+            {
+                maxPendingBlocks = Environment.ProcessorCount;
+            }
             this._mtMaxPendingBlocks = maxPendingBlocks;
             this._mtWorkerBufferSize = workerBufferSize;
 
@@ -191,29 +194,14 @@ namespace Bzip2.InputStream
         #region Implementation of abstract members of Stream
 
         #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        public override void Flush()
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'Flush()' method.");
-        }
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
-        }
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'SetLength(long value)' method.");
-        }
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'Write(byte[] buffer, int offset, int count)' method.");
-        }
+        public override void Flush() => throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'Flush()' method.");
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
+        public override void SetLength(long value) => throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'SetLength(long value)' method.");
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException($"{nameof(BZip2ParallelInputStream)} does not support 'Write(byte[] buffer, int offset, int count)' method.");
         public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length
-        {
-            get => this._inputStream.Length;
-        }
+        public override long Length => this._inputStream.Length;
         public override long Position
         {
             get => this._inputStream.Position;

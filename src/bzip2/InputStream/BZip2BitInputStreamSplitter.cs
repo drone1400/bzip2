@@ -32,7 +32,7 @@ namespace Bzip2.InputStream
         public int BlockSizeBytes => this._blockSizeBytes;
         public uint FinalCrc => this._finalCrc;
 
-        public BZip2BitInputStreamSplitter(Stream inputStream, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9)
+        public BZip2BitInputStreamSplitter(Stream inputStream, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FULL_HEADER, int manualBlockLevel = 9)
         {
             this._bitInputStream = new  BZip2BitInputStream(inputStream);
             this.Initialize(inputStreamHeaderCheck, manualBlockLevel);
@@ -48,7 +48,7 @@ namespace Bzip2.InputStream
             {
                 switch (inputStreamHeaderCheck)
                 {
-                    case InputStreamHeaderCheckType.FullHeader:
+                    case InputStreamHeaderCheckType.FULL_HEADER:
                     {
                         uint marker1 = this._bitInputStream.ReadBits(16);
                         uint marker2 = this._bitInputStream.ReadBits(8);
@@ -61,7 +61,7 @@ namespace Bzip2.InputStream
                         }
                         break;
                     }
-                    case InputStreamHeaderCheckType.NoBz:
+                    case InputStreamHeaderCheckType.NO_BZ:
                     {
                         uint marker2 = this._bitInputStream.ReadBits(8);
                         blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
@@ -72,7 +72,7 @@ namespace Bzip2.InputStream
                         }
                         break;
                     }
-                    case InputStreamHeaderCheckType.NoBzh:
+                    case InputStreamHeaderCheckType.NO_BZH:
                     {
                         blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
                         if (blockLevel < 1 ||  blockLevel > 9)

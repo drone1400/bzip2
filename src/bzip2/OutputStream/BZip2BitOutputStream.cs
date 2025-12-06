@@ -4,7 +4,6 @@
 // Ported from the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
 // Modified from the .net implementation by Jaime Olivares: http://github.com/jaime-olivares/bzip2
 
-using System;
 using System.IO;
 using Bzip2.Interface;
 namespace Bzip2.OutputStream
@@ -30,10 +29,7 @@ namespace Bzip2.OutputStream
         /// Public constructor
         /// </summary>
         /// <param name="outputStream">The OutputStream to wrap</param>
-        public BZip2BitOutputStream(Stream outputStream)
-        {
-            this._outputStream = outputStream;
-        }
+        public BZip2BitOutputStream(Stream outputStream) => this._outputStream = outputStream;
 
         public void Dispose()
         {
@@ -86,7 +82,9 @@ namespace Bzip2.OutputStream
         public void Flush()
         {
             if (this._bitCount > 0)
+            {
                 this.WriteBits (8 - this._bitCount, 0);
+            }
         }
 
         #endregion

@@ -14,14 +14,14 @@ namespace Bzip2.Interface
         /// </summary>
         /// <param name="value">The bit to write</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        void WriteBoolean (bool value);
+        public void WriteBoolean (bool value);
 
         /// <summary>
         /// Writes a zero-terminated unary number to the wrapped output stream
         /// </summary>
         /// <param name="value">The number to write (must be non-negative)</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        void WriteUnary (int value);
+        public void WriteUnary (int value);
 
         /// <summary>
         /// Writes up to 24 bits to the wrapped output stream
@@ -29,19 +29,19 @@ namespace Bzip2.Interface
         /// <param name="count">The number of bits to write (maximum 24)</param>
         /// <param name="value">The bits to write</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        void WriteBits (int count,  uint value) ;
+        public void WriteBits (int count,  uint value) ;
 
         /// <summary>
         /// Writes an integer as 32 bits of output
         /// </summary>
         /// <param name="value">The integer to write</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        void WriteInteger (uint value) ;
+        public void WriteInteger (uint value) ;
 
         /// <summary>
         /// Writes any remaining bits to the output stream, zero padding to a whole byte as required
         /// </summary>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        void Flush() ;
+        public void Flush() ;
     }
 }

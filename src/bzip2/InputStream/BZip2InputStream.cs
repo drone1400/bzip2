@@ -47,7 +47,7 @@ namespace Bzip2.InputStream
         /// <param name="isOwner">if true, will close the stream when done</param>
         /// <param name="inputStreamHeaderCheck"><see cref="InputStreamHeaderCheckType"/></param>
         /// <param name="manualBlockLevel">Used when <see cref="inputStreamHeaderCheck"/> is NoHeader</param>
-        public BZip2InputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FullHeader, int manualBlockLevel = 9)
+        public BZip2InputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FULL_HEADER, int manualBlockLevel = 9)
         {
             this._inputStream = inputStream;
             this._bitInputStream = new BZip2BitInputStream(inputStream);
@@ -62,29 +62,17 @@ namespace Bzip2.InputStream
         #region Implementation of abstract members of Stream
 
         #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        public override void Flush()
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Flush()' method.");
-        }
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
-        }
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'SetLength(long value)' method.");
-        }
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Write(byte[] buffer, int offset, int count)' method.");
-        }
-        public override bool CanRead => this._inputStream?.CanRead ?? false;
+        public override void Flush() => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Flush()' method.");
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
+        public override void SetLength(long value) => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'SetLength(long value)' method.");
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Write(byte[] buffer, int offset, int count)' method.");
+        public override bool CanRead => this._inputStream.CanRead;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length => this._inputStream?.Length ?? 0;
+        public override long Length => this._inputStream.Length;
         public override long Position
         {
-            get => this._inputStream?.Position ?? 0;
+            get => this._inputStream.Position;
             set =>throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support Set operation for property 'Position'.");
         }
 
@@ -158,7 +146,7 @@ namespace Bzip2.InputStream
             {
                 switch (inputStreamHeaderCheck)
                 {
-                    case InputStreamHeaderCheckType.FullHeader:
+                    case InputStreamHeaderCheckType.FULL_HEADER:
                     {
                         uint marker1 = this._bitInputStream.ReadBits(16);
                         uint marker2 = this._bitInputStream.ReadBits(8);
@@ -171,7 +159,7 @@ namespace Bzip2.InputStream
                         }
                         break;
                     }
-                    case InputStreamHeaderCheckType.NoBz:
+                    case InputStreamHeaderCheckType.NO_BZ:
                     {
                         uint marker2 = this._bitInputStream.ReadBits(8);
                         blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
@@ -182,7 +170,7 @@ namespace Bzip2.InputStream
                         }
                         break;
                     }
-                    case InputStreamHeaderCheckType.NoBzh:
+                    case InputStreamHeaderCheckType.NO_BZH:
                     {
                         blockLevel = ((int)this._bitInputStream.ReadBits(8) - '0');
                         if (blockLevel < 1 ||  blockLevel > 9)

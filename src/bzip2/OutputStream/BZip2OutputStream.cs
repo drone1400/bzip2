@@ -66,25 +66,13 @@ namespace Bzip2.OutputStream
         #region Implementation of abstract members of Stream
 
         #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        public override void Flush ()
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Flush()' method.");
-        }
+        public override void Flush () => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Flush()' method.");
 
-        public override int Read (byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Read(byte[] buffer, int offset, int count)' method.");
-        }
+        public override int Read (byte[] buffer, int offset, int count) => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Read(byte[] buffer, int offset, int count)' method.");
 
-        public override long Seek (long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
-        }
+        public override long Seek (long offset, SeekOrigin origin) => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'Seek(long offset, SeekOrigin origin)' method.");
 
-        public override void SetLength (long value)
-        {
-            throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'SetLength(long value)' method.");
-        }
+        public override void SetLength (long value) => throw new NotSupportedException($"{nameof(BZip2InputStream)} does not support 'SetLength(long value)' method.");
 
         public override bool CanRead => false;
 
@@ -152,10 +140,7 @@ namespace Bzip2.OutputStream
         #endregion
 
         /// <summary>Initialises a new block for compression</summary>
-        private void InitialiseNextBlock()
-        {
-            this._blockCompressor = new BZip2BlockCompressor (this._bitOutputStream, this._streamBlockSize);
-        }
+        private void InitialiseNextBlock() => this._blockCompressor = new BZip2BlockCompressor (this._bitOutputStream, this._streamBlockSize);
 
         /// <summary>Compress and write out the block currently in progress</summary>
         /// <remarks>If no bytes have been written to the block, it is discarded</remarks>
