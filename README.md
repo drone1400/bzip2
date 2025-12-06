@@ -1,11 +1,9 @@
 # bzip2.net
-A pure C# implementation of the bzip2 compressor
+A pure C# implementation of the bzip2 compressor with parallel compression and decompression support.
 
 Originally ported by Jaime Olivares: https://github.com/jaime-olivares/bzip2
 
 Based on the Java implementation by Matthew Francis: https://github.com/MateuszBartosiewicz/bzip2
-
-Modified for .NET6 and also added a multithreadded compressor.
 
 # Notes
 
