@@ -110,9 +110,13 @@ visual_basic_preferred_modifier_order = Partial,Default,Private,Protected,Public
 dotnet_style_readonly_field = true:warning
 # Parentheses preferences
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#parentheses-preferences
-dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:warning
-dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:warning
-dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:warning
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0047-ide0048
+# NOTE: this doesn't make sense to me, if I set them to always_for_clarity:warning, 
+#     I get warnings about having "redundant parentheses" but from what I understand
+#     always_for_clarity should do the opposite?! is my ide bugging out or am I?
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:suggestion
 dotnet_style_parentheses_in_other_operators = always_for_clarity:suggestion
 # Expression-level preferences
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#expression-level-preferences
@@ -146,9 +150,9 @@ dotnet_style_prefer_simplified_interpolation = true:warning
 [*.{cs,csx,cake}]
 # Implicit and explicit types
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#implicit-and-explicit-types
-csharp_style_var_for_built_in_types = true:warning
-csharp_style_var_when_type_is_apparent = true:warning
-csharp_style_var_elsewhere = true:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
 # Expression-bodied members
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#expression-bodied-members
 csharp_style_expression_bodied_methods = true:warning
