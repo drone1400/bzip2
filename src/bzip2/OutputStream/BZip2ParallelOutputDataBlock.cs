@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Bzip2.Algorithm;
+using Bzip2.InputStream;
 using Bzip2.Interface;
 namespace Bzip2.OutputStream
 {
@@ -16,9 +17,9 @@ namespace Bzip2.OutputStream
     /// </remarks>
     internal class BZip2ParallelOutputDataBlock : IBZip2BitOutputStream
     {
-        private BZip2BitOutputStream _internalBitStream;
-        private MemoryStream _buffer;
-        private long _bitCount = 0;
+        private BZip2BitStreamWrapper _internalBitStream;
+        //private MemoryStream _buffer;
+        //private long _bitCount = 0;
 
         /// <summary>
         /// Compressed block CRC to be stored here when block is finished
@@ -52,8 +53,8 @@ namespace Bzip2.OutputStream
         /// <param name="blockId">Block number id, used to distinguish blocks in multithreadding</param>
         public BZip2ParallelOutputDataBlock(int blockSizeBytes, int blockId)
         {
-            this._buffer = new MemoryStream(blockSizeBytes + 100000);
-            this._internalBitStream = new BZip2BitOutputStream(this._buffer);
+            //this._buffer = new MemoryStream(blockSizeBytes + 100000);
+            this._internalBitStream = new BZip2BitStreamWrapper(blockSizeBytes + 100000);
             this._blockId = blockId;
             this._compressor = new BZip2BlockCompressor(this, blockSizeBytes);
         }
@@ -61,7 +62,7 @@ namespace Bzip2.OutputStream
         public void Dispose()
         {
             this._internalBitStream.Dispose();
-            this._buffer.Dispose();
+            //this._buffer.Dispose();
         }
 
         /// <summary>
@@ -112,28 +113,25 @@ namespace Bzip2.OutputStream
         }
 
         /// <summary>
-        /// Writes all the buffer data to the real <see cref="BZip2BitOutputStream"/>
+        /// Writes all the buffer data to the real <see cref="IBZip2BitOutputStream"/>
         /// </summary>
         /// <param name="stream">The real bit output stream</param>
         /// <exception cref="Exception">if an error occurs writing to the stream</exception>
-        public void WriteToRealOutputStream(BZip2BitOutputStream stream)
+        public void WriteToRealOutputStream(IBZip2BitOutputStream stream)
         {
-            this._internalBitStream.Flush();
-
-            this._buffer.Position = 0;
-            while (this._bitCount >= 8)
+            int bitCount = this._internalBitStream.BitIndex;
+            this._internalBitStream.SeekBitPosition(0, 0);
+            while (bitCount >= 32)
             {
-                int b = this._buffer.ReadByte();
-                stream.WriteBits(8, (uint)b);
-                this._bitCount -= 8;
+
+                stream.WriteBits(32, this._internalBitStream.ReadBits(32));
+                bitCount -= 32;
             }
 
-            if (this._bitCount > 0)
+            while (bitCount > 0)
             {
-                int b = this._buffer.ReadByte();
-                b = (b >> (8 - (int)this._bitCount));
-                stream.WriteBits((int)this._bitCount, (uint)b);
-                this._bitCount = 0;
+                stream.WriteBits(1, this._internalBitStream.ReadBits(1));
+                bitCount -= 1;
             }
         }
 
@@ -141,27 +139,28 @@ namespace Bzip2.OutputStream
 
         public void WriteBoolean(bool value)
         {
-            this._bitCount++;
+            //this._bitCount++;
             this._internalBitStream.WriteBoolean(value);
         }
         public void WriteUnary(int value)
         {
-            while (value-- > 0)
-            {
-                this._bitCount++;
-                this._internalBitStream.WriteBoolean (true);
-            }
-            this._bitCount++;
-            this._internalBitStream.WriteBoolean (false);
+            // while (value-- > 0)
+            // {
+            //     //this._bitCount++;
+            //     this._internalBitStream.WriteBoolean (true);
+            // }
+            // //this._bitCount++;
+            // this._internalBitStream.WriteBoolean (false);
+            this._internalBitStream.WriteUnary(value);
         }
         public void WriteBits(int count, uint value)
         {
-            this._bitCount += count;
+            //this._bitCount += count;
             this._internalBitStream.WriteBits(count, value);
         }
         public void WriteInteger(uint value)
         {
-            this._bitCount += 32;
+            //this._bitCount += 32;
             this._internalBitStream.WriteInteger(value);
         }
         public void Flush() => this._internalBitStream.Flush();

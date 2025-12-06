@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Bzip2.Algorithm;
+using Bzip2.Interface;
 namespace Bzip2.InputStream
 {
     public class BZip2ParallelInputDataBlock : IDisposable
@@ -48,7 +49,7 @@ namespace Bzip2.InputStream
 
             // note: we need to skip the first 6 magic bytes...
             this._inputBlockBuffer.Position = 6;
-            using BZip2BitInputStream inputStream = new BZip2BitInputStream(this._inputBlockBuffer);
+            using BZip2BitStreamWrapper inputStream = new BZip2BitStreamWrapper(this._inputBlockBuffer, false);
             BZip2BlockDecompressor blockDecompressor = new BZip2BlockDecompressor(inputStream, (uint)this._blockSizeBytes);
 
             int readCount = blockDecompressor.ReadAll(this._outputBuffer);

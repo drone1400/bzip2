@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Bzip2.Interface;
 namespace Bzip2.OutputStream
 {
 
@@ -40,7 +41,7 @@ namespace Bzip2.OutputStream
         private readonly Stream _outputStream;
 
         // The bit output stream
-        private readonly BZip2BitOutputStream _bitStream;
+        private readonly IBZip2BitOutputStream _bitStream;
 
         // The merged CRC of all blocks compressed so far
         private uint _streamCrc = 0;

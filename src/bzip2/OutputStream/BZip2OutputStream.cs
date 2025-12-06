@@ -19,7 +19,7 @@ namespace Bzip2.OutputStream
         private Stream _outputStream;
 
         // An OutputStream wrapper that provides bit-level writes
-        private readonly BZip2BitOutputStream _bitOutputStream;
+        private readonly IBZip2BitOutputStream _bitOutputStream;
 
         // (@code true} if the compressed stream has been finished, otherwise false
         private bool _streamFinished;

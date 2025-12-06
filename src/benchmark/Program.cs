@@ -4,4 +4,5 @@
 using BenchmarkDotNet.Running;
 using Bzip2.benchmark;
 var summary = BenchmarkRunner.Run<DmodBenchmark>();
+//var summary = BenchmarkRunner.Run<TempBenchmark>();
 

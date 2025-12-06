@@ -1,0 +1,40 @@
+BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6456/22H2/2022Update)
+13th Gen Intel Core i7-13700K 3.40GHz, 1 CPU, 24 logical and 16 physical cores
+  [Host]               : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  .NET 10.0            : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v3
+  .NET 8.0             : .NET 8.0.22 (8.0.22, 8.0.2225.52707), X64 RyuJIT x86-64-v3
+  .NET Framework 4.7.2 : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  .NET Framework 4.8   : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+
+
+| Method | Job                  | Runtime              | Mean        | Error     | StdDev    | Median      | Ratio | RatioSD |
+|------- |--------------------- |--------------------- |------------:|----------:|----------:|------------:|------:|--------:|
+| CMT    | .NET 10.0            | .NET 10.0            |    313.9 ms |   1.69 ms |   1.49 ms |    313.4 ms |  0.61 |    0.02 |
+| CMT    | .NET 8.0             | .NET 8.0             |    340.0 ms |   6.76 ms |   7.24 ms |    338.8 ms |  0.67 |    0.03 |
+| CMT    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |    503.5 ms |   9.92 ms |  14.84 ms |    501.3 ms |  0.99 |    0.05 |
+| CMT    | .NET Framework 4.8   | .NET Framework 4.8   |    511.6 ms |  10.23 ms |  20.66 ms |    514.2 ms |  1.00 |    0.06 |
+|        |                      |                      |             |           |           |             |       |         |
+| CST    | .NET 10.0            | .NET 10.0            |  1,128.3 ms |  12.79 ms |  11.97 ms |  1,128.5 ms |  0.87 |    0.01 |
+| CST    | .NET 8.0             | .NET 8.0             |  1,125.2 ms |   3.49 ms |   2.73 ms |  1,125.1 ms |  0.86 |    0.00 |
+| CST    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |  1,290.6 ms |  13.04 ms |  12.20 ms |  1,290.9 ms |  0.99 |    0.01 |
+| CST    | .NET Framework 4.8   | .NET Framework 4.8   |  1,304.2 ms |   6.09 ms |   5.40 ms |  1,305.8 ms |  1.00 |    0.01 |
+|        |                      |                      |             |           |           |             |       |         |
+| CSC    | .NET 10.0            | .NET 10.0            |  3,565.4 ms |  41.53 ms |  38.84 ms |  3,563.8 ms |  0.88 |    0.01 |
+| CSC    | .NET 8.0             | .NET 8.0             |  3,634.0 ms |  36.67 ms |  28.63 ms |  3,633.3 ms |  0.89 |    0.01 |
+| CSC    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |  4,069.8 ms |  40.98 ms |  38.33 ms |  4,062.3 ms |  1.00 |    0.01 |
+| CSC    | .NET Framework 4.8   | .NET Framework 4.8   |  4,065.2 ms |  40.64 ms |  38.01 ms |  4,047.6 ms |  1.00 |    0.01 |
+|        |                      |                      |             |           |           |             |       |         |
+| DMT    | .NET 10.0            | .NET 10.0            |    454.4 ms |   8.62 ms |   8.47 ms |    456.0 ms |  0.01 |    0.00 |
+| DMT    | .NET 8.0             | .NET 8.0             |    719.3 ms |  78.63 ms | 231.84 ms |    519.2 ms |  0.02 |    0.01 |
+| DMT    | .NET Framework 4.7.2 | .NET Framework 4.7.2 | 42,235.6 ms | 110.30 ms |  97.77 ms | 42,214.1 ms |  0.99 |    0.00 |
+| DMT    | .NET Framework 4.8   | .NET Framework 4.8   | 42,693.8 ms | 148.18 ms | 138.61 ms | 42,656.3 ms |  1.00 |    0.00 |
+|        |                      |                      |             |           |           |             |       |         |
+| DST    | .NET 10.0            | .NET 10.0            |    864.4 ms |   8.01 ms |   7.10 ms |    863.7 ms |  0.03 |    0.00 |
+| DST    | .NET 8.0             | .NET 8.0             |    870.6 ms |   8.13 ms |   6.79 ms |    873.1 ms |  0.03 |    0.00 |
+| DST    | .NET Framework 4.7.2 | .NET Framework 4.7.2 | 26,879.7 ms | 108.85 ms | 101.82 ms | 26,850.9 ms |  0.99 |    0.00 |
+| DST    | .NET Framework 4.8   | .NET Framework 4.8   | 27,224.3 ms |  86.72 ms |  81.12 ms | 27,221.9 ms |  1.00 |    0.00 |
+|        |                      |                      |             |           |           |             |       |         |
+| DSC    | .NET 10.0            | .NET 10.0            |    631.8 ms |  11.08 ms |  10.36 ms |    631.1 ms |  0.57 |    0.01 |
+| DSC    | .NET 8.0             | .NET 8.0             |    630.0 ms |  12.11 ms |  13.47 ms |    624.7 ms |  0.56 |    0.01 |
+| DSC    | .NET Framework 4.7.2 | .NET Framework 4.7.2 |  1,082.8 ms |  20.53 ms |  21.97 ms |  1,081.1 ms |  0.97 |    0.02 |
+| DSC    | .NET Framework 4.8   | .NET Framework 4.8   |  1,118.2 ms |  14.02 ms |  12.42 ms |  1,119.2 ms |  1.00 |    0.02 |

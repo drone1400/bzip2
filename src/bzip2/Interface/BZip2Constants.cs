@@ -1,6 +1,9 @@
 // Added by drone1400, December 2025
 // Location: https://github.com/drone1400/bzip2
 
+using System.Runtime.CompilerServices;
+[assembly:InternalsVisibleTo("bzip2.benchmark")]
+
 namespace Bzip2.Interface {
     public static class BZip2Constants {
         public const uint STREAM_START_MARKER = 0x425A68;

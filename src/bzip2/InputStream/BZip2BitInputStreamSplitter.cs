@@ -16,7 +16,7 @@ namespace Bzip2.InputStream
     {
 
         // The stream from which bits are read
-        private BZip2BitInputStream? _bitInputStream;
+        private IBZip2BitInputStream? _bitInputStream;
 
         // internal temporary buffer
         private MemoryStream? _buffer = null;
@@ -34,7 +34,7 @@ namespace Bzip2.InputStream
 
         public BZip2BitInputStreamSplitter(Stream inputStream, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FULL_HEADER, int manualBlockLevel = 9)
         {
-            this._bitInputStream = new  BZip2BitInputStream(inputStream);
+            this._bitInputStream = new  BZip2BitStreamWrapper(inputStream, false);
             this.Initialize(inputStreamHeaderCheck, manualBlockLevel);
         }
 

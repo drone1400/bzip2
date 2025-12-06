@@ -21,7 +21,7 @@ namespace Bzip2.InputStream
         private readonly bool _isOwner;
 
         // An InputStream wrapper that provides bit-level reads
-        private BZip2BitInputStream _bitInputStream;
+        private IBZip2BitInputStream _bitInputStream;
 
         // (@code true} if the end of the compressed stream has been reached, otherwise false
         private bool _streamComplete;
@@ -50,7 +50,7 @@ namespace Bzip2.InputStream
         public BZip2InputStream(Stream inputStream, bool isOwner = true, InputStreamHeaderCheckType inputStreamHeaderCheck = InputStreamHeaderCheckType.FULL_HEADER, int manualBlockLevel = 9)
         {
             this._inputStream = inputStream;
-            this._bitInputStream = new BZip2BitInputStream(inputStream);
+            this._bitInputStream = new BZip2BitStreamWrapper(inputStream, isOwner);
             this._isOwner = isOwner;
 
             // initialize stream immediately
