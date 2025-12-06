@@ -1,0 +1,13 @@
+--- V2.0.0
+- updated frameworks and packages
+- improved multi-thread compression implementation
+- added multi-thread decompression implementation
+- added benchmarks
+- reorganized source files in csproj
+- cleaned up tests
+- cleaned up various comments
+- cleaned up style formatting
+
+--- V1.1.0
+- original version that was modified by me around 2022 to have some kind of multi thread compression
+- i did not update version number at the time

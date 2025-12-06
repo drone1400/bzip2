@@ -38,6 +38,7 @@
     <None Include="..\..\.gitignore" LinkBase=".metadata" />
     <None Include="..\..\LICENSE" LinkBase=".metadata" />
     <None Include="..\..\README.md" LinkBase=".metadata" />
+    <None Include="..\..\CHANGELOG" LinkBase=".metadata" />
     <None Include="..\..\doc\**\*.*" LinkBase=".metadata\doc"/>
   </ItemGroup>
 
