@@ -50,12 +50,12 @@ namespace Bzip2.OutputStream
         /// </summary>
         /// <param name="blockSizeBytes"><see cref="BZip2BlockCompressor"/> block size in bytes, also initial internal buffer list capacity</param>
         /// <param name="blockId">Block number id, used to distinguish blocks in multithreadding</param>
-        public BZip2ParallelOutputDataBlock(int blockBytes, int blockId)
+        public BZip2ParallelOutputDataBlock(int blockSizeBytes, int blockId)
         {
-            this._buffer = new MemoryStream(blockBytes + 100000);
+            this._buffer = new MemoryStream(blockSizeBytes + 100000);
             this._internalBitStream = new BZip2BitOutputStream(this._buffer);
             this._blockId = blockId;
-            this._compressor = new BZip2BlockCompressor(this, blockBytes);
+            this._compressor = new BZip2BlockCompressor(this, blockSizeBytes);
         }
 
         /// <summary>

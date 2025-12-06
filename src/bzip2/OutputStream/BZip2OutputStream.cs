@@ -16,25 +16,25 @@ namespace Bzip2.OutputStream
     public class BZip2OutputStream : Stream
     {
         // The stream to which compressed BZip2 data is written
-        private Stream outputStream;
+        private Stream _outputStream;
 
         // An OutputStream wrapper that provides bit-level writes
-        private readonly BZip2BitOutputStream bitOutputStream;
+        private readonly BZip2BitOutputStream _bitOutputStream;
 
         // (@code true} if the compressed stream has been finished, otherwise false
-        private bool streamFinished;
+        private bool _streamFinished;
 
         // The declared maximum block size of the stream (before final run-length decoding)
-        private readonly int streamBlockSize;
+        private readonly int _streamBlockSize;
 
         // The merged CRC of all blocks compressed so far
-        private uint streamCRC;
+        private uint _streamCrc;
 
         // The compressor for the current block
-        private BZip2BlockCompressor blockCompressor;
+        private BZip2BlockCompressor _blockCompressor;
 
         // True if the underlying stream will be closed with the current Stream
-        private bool isOwner;
+        private bool _isOwner;
         
         /// <summary>Public constructor</summary>
         /// <param name="outputStream">The output stream to write to</param>
@@ -51,14 +51,14 @@ namespace Bzip2.OutputStream
             if ((blockSizeMultiplier < 1) || (blockSizeMultiplier > 9))
                 throw new ArgumentException("Invalid BZip2 block size" + blockSizeMultiplier);
 
-            this.streamBlockSize = blockSizeMultiplier * 100000;
-            this.outputStream = outputStream;
-            this.bitOutputStream = new BZip2BitOutputStream(this.outputStream);
-            this.isOwner = isOwner;
+            this._streamBlockSize = blockSizeMultiplier * 100000;
+            this._outputStream = outputStream;
+            this._bitOutputStream = new BZip2BitOutputStream(this._outputStream);
+            this._isOwner = isOwner;
 
-            this.bitOutputStream.WriteBits(16, BZip2Constants.STREAM_START_MARKER_1);
-            this.bitOutputStream.WriteBits(8, BZip2Constants.STREAM_START_MARKER_2);
-            this.bitOutputStream.WriteBits(8, (uint)('0' + blockSizeMultiplier));
+            this._bitOutputStream.WriteBits(16, BZip2Constants.STREAM_START_MARKER_1);
+            this._bitOutputStream.WriteBits(8, BZip2Constants.STREAM_START_MARKER_2);
+            this._bitOutputStream.WriteBits(8, (uint)('0' + blockSizeMultiplier));
 
             this.InitialiseNextBlock();
         }
@@ -90,44 +90,44 @@ namespace Bzip2.OutputStream
 
         public override bool CanSeek => false;
 
-        public override bool CanWrite => this.outputStream.CanWrite;
+        public override bool CanWrite => this._outputStream.CanWrite;
 
-        public override long Length => this.outputStream.Length;
+        public override long Length => this._outputStream.Length;
 
         public override long Position
         {
-            get => this.outputStream.Position;
+            get => this._outputStream.Position;
             set =>throw new NotSupportedException($"{nameof(BZip2OutputStream)} does not support Set operation for property 'Position'.");
         }
 
         public override void WriteByte(byte value)
         {
-            if (this.outputStream == null)
+            if (this._outputStream == null)
                 throw new IOException("Stream closed");
 
-            if (this.streamFinished)
+            if (this._streamFinished)
                 throw new IOException("Write beyond end of stream");
 
-            if (!this.blockCompressor.Write(value & 0xff))
+            if (!this._blockCompressor.Write(value & 0xff))
             {
                 this.CloseBlock();
                 this.InitialiseNextBlock();
-                this.blockCompressor.Write(value & 0xff);
+                this._blockCompressor.Write(value & 0xff);
             }
         }
 
         public override void Write(byte[] data, int offset, int length)
         {
-            if (this.outputStream == null)
+            if (this._outputStream == null)
                 throw new IOException("Stream closed");
 
-            if (this.streamFinished)
+            if (this._streamFinished)
                 throw new IOException("Write beyond end of stream");
 
             while (length > 0)
             {
                 int bytesWritten;
-                if ((bytesWritten = this.blockCompressor.Write(data, offset, length)) < length)
+                if ((bytesWritten = this._blockCompressor.Write(data, offset, length)) < length)
                 {
                     this.CloseBlock();
                     this.InitialiseNextBlock();
@@ -140,12 +140,12 @@ namespace Bzip2.OutputStream
         // overriding Dispose instead of Close as recommended in https://docs.microsoft.com/en-us/dotnet/api/system.io.stream.close?view=net-6.0
         protected override void Dispose(bool disposing)
         {
-            if (this.outputStream != null)
+            if (this._outputStream != null)
             {
                 this.Finish();
-                if (this.isOwner)
-                    this.outputStream.Close();
-                this.outputStream = null;
+                if (this._isOwner)
+                    this._outputStream.Close();
+                this._outputStream = null;
             }
         }
 
@@ -156,7 +156,7 @@ namespace Bzip2.OutputStream
         /// <summary>Initialises a new block for compression</summary> 
         private void InitialiseNextBlock()
         {
-            this.blockCompressor = new BZip2BlockCompressor (this.bitOutputStream, this.streamBlockSize);
+            this._blockCompressor = new BZip2BlockCompressor (this._bitOutputStream, this._streamBlockSize);
         }
 
         /// <summary>Compress and write out the block currently in progress</summary>
@@ -164,11 +164,11 @@ namespace Bzip2.OutputStream
         /// <exception>On any I/O error writing to the output stream</exception>
         private void CloseBlock()
         {
-            if (this.blockCompressor.IsEmpty)
+            if (this._blockCompressor.IsEmpty)
                 return;
 
-            this.blockCompressor.CloseBlock();
-            this.streamCRC = ((this.streamCRC << 1) | (this.streamCRC >> 31)) ^ this.blockCompressor.CRC;
+            this._blockCompressor.CloseBlock();
+            this._streamCrc = ((this._streamCrc << 1) | (this._streamCrc >> 31)) ^ this._blockCompressor.CRC;
         }
 
         /// <summary>Compresses and writes out any as yet unwritten data, then writes the end of the BZip2 stream</summary>
@@ -176,20 +176,20 @@ namespace Bzip2.OutputStream
         /// <exception>On any I/O error writing to the output stream</exception>
         private void Finish()
         {
-            if (!this.streamFinished)
+            if (!this._streamFinished)
             {
-                this.streamFinished = true;
+                this._streamFinished = true;
                 try
                 {
                     this.CloseBlock();
-                    this.bitOutputStream.WriteBits(24, BZip2Constants.STREAM_END_MARKER_1);
-                    this.bitOutputStream.WriteBits(24, BZip2Constants.STREAM_END_MARKER_2);
-                    this.bitOutputStream.WriteInteger(this.streamCRC);
-                    this.bitOutputStream.Flush();
-                    this.outputStream.Flush();
+                    this._bitOutputStream.WriteBits(24, BZip2Constants.STREAM_END_MARKER_1);
+                    this._bitOutputStream.WriteBits(24, BZip2Constants.STREAM_END_MARKER_2);
+                    this._bitOutputStream.WriteInteger(this._streamCrc);
+                    this._bitOutputStream.Flush();
+                    this._outputStream.Flush();
                 } finally
                 {
-                    this.blockCompressor = null;
+                    this._blockCompressor = null;
                 }
             }
         }
