@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+        <MSBUildProjectExtensionsPath>..\..\output.MsBuildProps\benchmark\</MSBUildProjectExtensionsPath>
+        <BaseIntermediateOutputPath>..\..\output.benchmark.obj\</BaseIntermediateOutputPath>
+    </PropertyGroup>
+</Project>

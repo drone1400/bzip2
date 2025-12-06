@@ -3,6 +3,8 @@ output/*
 output.obj/*
 output.test/*
 output.test.obj/*
+output.benchmark/*
+output.benchmark.obj/*
 output.MsBuildProps/*
 
 #visual studio stuff
